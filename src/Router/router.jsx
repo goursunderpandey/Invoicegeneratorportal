@@ -6,23 +6,23 @@ import { pagesRoute, posRoutes, publicRoutes } from "./router.link";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ThemeSettings from "../InitialPage/themeSettings";
+import ProtectedRoute from "./ProtectedRoute";
 
 const AllRoutes = () => {
   const data = useSelector((state) => state.toggle_header);
-  const HeaderLayout = () => ( 
+
+  const HeaderLayout = () => (
     <div className={`main-wrapper ${data ? "header-collapse" : ""}`}>
-    {/* <Loader /> */}
-    <Header />
-    <Sidebar />
-    <Outlet />
-    <ThemeSettings />
-  </div>
+      <Header />
+      <Sidebar />
+      <Outlet />
+      <ThemeSettings />
+    </div>
   );
 
   const Authpages = () => (
     <div className={data ? "header-collapse" : ""}>
-    <Outlet />
-      {/* <Loader /> */}
+      <Outlet />
       <ThemeSettings />
     </div>
   );
@@ -31,7 +31,6 @@ const AllRoutes = () => {
     <div>
       <Header />
       <Outlet />
-      {/* <Loader /> */}
       <ThemeSettings />
     </div>
   );
@@ -39,17 +38,35 @@ const AllRoutes = () => {
   return (
     <div>
       <Routes>
-        <Route path="/pos" element={<Pospages />}>
+        {/* ✅ POS routes (Private) */}
+        <Route
+          path="/pos"
+          element={
+            <ProtectedRoute>
+              <Pospages />
+            </ProtectedRoute>
+          }
+        >
           {posRoutes.map((route, id) => (
             <Route path={route.path} element={route.element} key={id} />
           ))}
         </Route>
-        <Route path={"/"} element={<HeaderLayout />}>
+
+        {/* ✅ App main pages (Private) */}
+        <Route
+          path={"/"}
+          element={
+            <ProtectedRoute>
+              <HeaderLayout />
+            </ProtectedRoute>
+          }
+        >
           {publicRoutes.map((route, id) => (
             <Route path={route.path} element={route.element} key={id} />
           ))}
         </Route>
 
+        {/* ✅ Auth pages (Public) */}
         <Route path={"/"} element={<Authpages />}>
           {pagesRoute.map((route, id) => (
             <Route path={route.path} element={route.element} key={id} />

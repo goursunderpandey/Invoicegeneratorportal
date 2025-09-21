@@ -1,21 +1,53 @@
 import React, { useState } from "react";
 import ImageWithBasePath from "../../../core/img/imagewithbasebath";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../../Router/all_routes";
+import axios from "axios";
+import config from "../../../config";
 
 const SigninTwo = () => {
   const route = all_routes;
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevState) => !prevState);
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${config.Backendurl}/auth/login`, {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      
+      localStorage.setItem("token", res.data.token);
+
+      alert("Login successful!");
+      navigate(route.dashboard); // redirect after login
+    } catch (err) {
+      alert(err.response?.data?.error || "Login failed");
+    }
+  };
+
   return (
     <div className="main-wrapper">
       <div className="account-content">
         <div className="login-wrapper">
           <div className="login-content">
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="login-userset">
                 <div className="login-logo logo-normal">
                   <ImageWithBasePath src="assets/img/logo.png" alt="img" />
@@ -25,26 +57,36 @@ const SigninTwo = () => {
                 </Link>
                 <div className="login-userheading">
                   <h3>Sign In</h3>
-                  <h4>
-                    Access the Dreamspos panel using your email and passcode.
-                  </h4>
+                  <h4>Access the Dreamspos panel using your email and passcode.</h4>
                 </div>
+
+                {/* Email */}
                 <div className="form-login">
                   <label>Email Address</label>
                   <div className="form-addons">
-                    <input type="text" className="form-control" />
-                    <ImageWithBasePath
-                      src="assets/img/icons/mail.svg"
-                      alt="img"
+                    <input
+                      type="email"
+                      name="email"
+                      className="form-control"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                     />
+                    <ImageWithBasePath src="assets/img/icons/mail.svg" alt="img" />
                   </div>
                 </div>
+
+                {/* Password */}
                 <div className="form-login">
                   <label>Password</label>
                   <div className="pass-group">
                     <input
                       type={isPasswordVisible ? "text" : "password"}
+                      name="password"
                       className="pass-input form-control"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
                     />
                     <span
                       className={`fas toggle-password ${
@@ -54,6 +96,8 @@ const SigninTwo = () => {
                     ></span>
                   </div>
                 </div>
+
+                {/* Remember me + Forgot password */}
                 <div className="form-login authentication-check">
                   <div className="row">
                     <div className="col-6">
@@ -66,20 +110,21 @@ const SigninTwo = () => {
                       </div>
                     </div>
                     <div className="col-6 text-end">
-                      <Link
-                        className="forgot-link"
-                        to={route.forgotPasswordTwo}
-                      >
+                      <Link className="forgot-link" to={route.forgotPasswordTwo}>
                         Forgot Password?
                       </Link>
                     </div>
                   </div>
                 </div>
+
+                {/* Submit */}
                 <div className="form-login">
-                  <Link to={route.signin} className="btn btn-login">
+                  <button type="submit" className="btn btn-login">
                     Sign In
-                  </Link>
+                  </button>
                 </div>
+
+                {/* Sign up link */}
                 <div className="signinform">
                   <h4>
                     New on our platform?
@@ -89,9 +134,12 @@ const SigninTwo = () => {
                     </Link>
                   </h4>
                 </div>
+
                 <div className="form-setlogin or-text">
                   <h4>OR</h4>
                 </div>
+
+                {/* Social logins */}
                 <div className="form-sociallink">
                   <ul className="d-flex">
                     <li>
@@ -126,6 +174,7 @@ const SigninTwo = () => {
               </div>
             </form>
           </div>
+
           <div className="login-img">
             <ImageWithBasePath
               src="assets/img/authentication/login02.png"

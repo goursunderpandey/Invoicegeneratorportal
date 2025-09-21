@@ -1,10 +1,24 @@
 import React, { useState } from "react";
 import ImageWithBasePath from "../../../core/img/imagewithbasebath";
-import { Link } from "react-router-dom";
+import { Link,  useNavigate } from "react-router-dom";
 import { all_routes } from "../../../Router/all_routes";
+import axios from "axios";
+import config from "../../../config";
 
 const RegisterThree = () => {
   const route = all_routes;
+
+  const navigate = useNavigate()
+
+  const [formdata, setformdata] = useState({
+    Name: '',
+    Email: '',
+    Password: '',
+    confirmPassword: ''
+
+  })
+
+
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
@@ -17,6 +31,38 @@ const RegisterThree = () => {
     }));
   };
 
+  const handlechange = (e) => {
+
+    const { name, value } = e.target;
+
+    setformdata({ ...formdata, [name]: value })
+
+  }
+  const Handlesubmit = async (e) => {
+    e.preventDefault();
+
+    if (formdata.Password !== formdata.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${config.Backendurl}/auth/signup`, {
+        name: formdata.Name,
+        email: formdata.Email,
+        password: formdata.Password,
+      });
+
+        
+      navigate(route.signintwo)
+      console.log(res);
+     
+    } catch (err) {
+      alert(err.response?.data?.error || "Something went wrong");
+    }
+  };
+
+
   return (
     <div className="main-wrapper">
       <div className="account-content">
@@ -28,16 +74,17 @@ const RegisterThree = () => {
                 <ImageWithBasePath src="assets/img/logo-white.png" alt />
               </Link>
             </div>
-            <form action="signin-3">
+            <form onSubmit={Handlesubmit}>
+
               <div className="login-userset">
                 <div className="login-userheading">
                   <h3>Register</h3>
-                  <h4>Create New Dreamspos Account</h4>
+                  <h4>Create New Krishnapos Account</h4>
                 </div>
                 <div className="form-login">
                   <label>Name</label>
                   <div className="form-addons">
-                    <input type="text" className="form-control" />
+                    <input type="text" name="Name" className="form-control" value={formdata.Name} onChange={handlechange} />
                     <ImageWithBasePath
                       src="assets/img/icons/user-icon.svg"
                       alt="img"
@@ -47,7 +94,7 @@ const RegisterThree = () => {
                 <div className="form-login">
                   <label>Email Address</label>
                   <div className="form-addons">
-                    <input type="text" className="form-control" />
+                    <input type="email" name="Email" className="form-control" value={formdata.Email} onChange={handlechange} />
                     <ImageWithBasePath
                       src="assets/img/icons/mail.svg"
                       alt="img"
@@ -60,11 +107,12 @@ const RegisterThree = () => {
                     <input
                       type={passwordVisibility.password ? "text" : "password"}
                       className="pass-input form-control"
+                      name="Password"
+                      value={formdata.password} onChange={handlechange}
                     />
                     <span
-                      className={`fas toggle-password ${
-                        passwordVisibility.password ? "fa-eye" : "fa-eye-slash"
-                      }`}
+                      className={`fas toggle-password ${passwordVisibility.password ? "fa-eye" : "fa-eye-slash"
+                        }`}
                       onClick={() => togglePasswordVisibility("password")}
                     ></span>
                   </div>
@@ -75,15 +123,17 @@ const RegisterThree = () => {
                     <input
                       type={
                         passwordVisibility.confirmPassword ? "text" : "password"
+
                       }
+                      name="confirmPassword"
                       className="pass-input form-control"
+                      value={formdata.confirmPassword} onChange={handlechange}
                     />
                     <span
-                      className={`fas toggle-password ${
-                        passwordVisibility.confirmPassword
-                          ? "fa-eye"
-                          : "fa-eye-slash"
-                      }`}
+                      className={`fas toggle-password ${passwordVisibility.confirmPassword
+                        ? "fa-eye"
+                        : "fa-eye-slash"
+                        }`}
                       onClick={() =>
                         togglePasswordVisibility("confirmPassword")
                       }
@@ -108,14 +158,15 @@ const RegisterThree = () => {
                   </div>
                 </div>
                 <div className="form-login">
-                  <Link to={route.signin} className="btn btn-login">
+                  <button type="submit" className="btn btn-login">
                     Sign Up
-                  </Link>
+                  </button>
+
                 </div>
                 <div className="signinform">
                   <h4>
                     Already have an account ?{" "}
-                    <Link to={route.signinthree} className="hover-a">
+                    <Link to={route.signintwo} className="hover-a">
                       Sign In Instead
                     </Link>
                   </h4>
@@ -151,6 +202,7 @@ const RegisterThree = () => {
                     </li>
                   </ul>
                 </div>
+
               </div>
             </form>
           </div>

@@ -211,7 +211,7 @@ const ProductList = () => {
         <div className="page-header">
           <div className="add-item d-flex">
             <div className="page-title">
-              <h4>Product List</h4>
+              <h4>abhya </h4>
               <h6>Manage your products</h6>
             </div>
           </div>
