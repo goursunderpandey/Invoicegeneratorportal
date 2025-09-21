@@ -155,7 +155,7 @@ import FileManager from "../feature-module/Application/filemanager";
 import Profile from "../feature-module/pages/profile";
 import Signin from "../feature-module/pages/login/signin";
 import SigninTwo from "../feature-module/pages/login/signinTwo";
-import SigninThree from "../feature-module/pages/login/signinThree";
+// import SigninThree from "../feature-module/pages/login/signinThree";
 import RegisterTwo from "../feature-module/pages/register/registerTwo";
 import Register from "../feature-module/pages/register/register";
 import RegisterThree from "../feature-module/pages/register/registerThree";
@@ -1421,13 +1421,13 @@ export const posRoutes = [
 ];
 
 export const pagesRoute = [
-  {
-    id: 1,
-    path: routes.signin,
-    name: "signin",
-    element: <SigninThree />,
-    route: Route,
-  },
+  // {
+  //   id: 1,
+  //   path: routes.signin,
+  //   name: "signin",
+  //   element: <SigninThree />,
+  //   route: Route,
+  // },
   {
     id: 2,
     path: routes.signintwo,

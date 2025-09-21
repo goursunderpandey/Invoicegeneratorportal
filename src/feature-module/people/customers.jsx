@@ -1,18 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Breadcrumbs from "../../core/breadcrumbs";
 import { Link } from "react-router-dom";
 import { Filter, Sliders } from "react-feather";
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
 import Select from "react-select";
-import { Edit, Eye, Globe, Trash2, User } from "react-feather";
-import { useSelector } from "react-redux";
+import { Edit, Globe, Trash2, User } from "react-feather";
 import Table from "../../core/pagination/datatable";
 import CustomerModal from "../../core/modals/peoples/customerModal";
+import CustomereditModal from "../../core/modals/peoples/customereditModal";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import axios from "axios";
+import config from "../../config";
 
 const Customers = () => {
-  const data = useSelector((state) => state.customerdata);
+  //const data = useSelector((state) => state.customerdata);
+
+  const [data, setdata] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editCustomer, setEditCustomer] = useState(null);
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const toggleFilterVisibility = () => {
@@ -38,79 +44,77 @@ const Customers = () => {
     { label: "USA", value: "USA" },
   ];
 
+  const handleEditClick = (customer) => {
+    let value = data.find((el) => el._id === customer)
+   console.log(value,"edit");
+    setEditCustomer(value);
+    setShowModal(true);
+  };
+
+  const handleAddClick = () => {
+    console.log(23,"edit");
+    setEditCustomer(null);
+    setShowModal(true);
+  };
+
   const columns = [
     {
-      title: "Customer Name",
-      dataIndex: "CustomerName",
-      sorter: (a, b) => a.CustomerName.length - b.CustomerName.length,
+      title: "Company Name",
+      dataIndex: "companyName",
+      sorter: (a, b) => a.companyName.length - b.companyName.length,
     },
-    {
-      title: "Code",
-      dataIndex: "Code",
-      sorter: (a, b) => a.Code.length - b.Code.length,
-    },
-    {
-      title: "Customer",
-      dataIndex: "Customer",
-      sorter: (a, b) => a.Customer.length - b.Customer.length,
-    },
-
     {
       title: "Email",
-      dataIndex: "Email",
-      sorter: (a, b) => a.Email.length - b.Email.length,
+      dataIndex: "email",
+      sorter: (a, b) => a.email.length - b.email.length,
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      sorter: (a, b) => a.phoneNumber.length - b.phoneNumber.length,
     },
 
     {
-      title: "Phone",
-      dataIndex: "Phone",
-      sorter: (a, b) => a.Phone.length - b.Phone.length,
+      title: "Address",
+      dataIndex: "address",
+      sorter: (a, b) => a.address.length - b.address.length,
     },
 
     {
-      title: "Country",
-      dataIndex: "Country",
-      sorter: (a, b) => a.Country.length - b.Country.length,
+      title: "Gst No",
+      dataIndex: "gstNo",
+      sorter: (a, b) => a.gstNo.length - b.gstNo.length,
     },
-
     {
       title: "Action",
-      dataIndex: "action",
-      render: () => (
+      dataIndex: "_id",
+      render: (id) => (
         <div className="action-table-data">
           <div className="edit-delete-action">
-            <div className="input-block add-lists"></div>
-
-            <Link className="me-2 p-2" to="#">
-              <Eye className="feather-view" />
-            </Link>
-
             <Link
               className="me-2 p-2"
               to="#"
-              data-bs-toggle="modal"
-              data-bs-target="#edit-units"
+              onClick={() => handleEditClick(id)}
             >
               <Edit className="feather-edit" />
             </Link>
-
             <Link
               className="confirm-text p-2"
               to="#"
-              onClick={showConfirmationAlert}
+              onClick={() => showConfirmationAlert(id)}
             >
               <Trash2 className="feather-trash-2" />
             </Link>
           </div>
         </div>
       ),
-      sorter: (a, b) => a.createdby.length - b.createdby.length,
-    },
+    }
+
   ];
 
   const MySwal = withReactContent(Swal);
 
-  const showConfirmationAlert = () => {
+  const showConfirmationAlert = async (id) => {
     MySwal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -119,22 +123,64 @@ const Customers = () => {
       confirmButtonText: "Yes, delete it!",
       cancelButtonColor: "#ff0000",
       cancelButtonText: "Cancel",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        MySwal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          className: "btn btn-success",
-          confirmButtonText: "OK",
-          customClass: {
-            confirmButton: "btn btn-success",
-          },
-        });
-      } else {
-        MySwal.close();
+        try {
+          const token = localStorage.getItem("token");
+          await axios.delete(`${config.Backendurl}/deletecustomer/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          // Update state after delete
+          setdata((prev) => prev.filter((item) => item._id !== id));
+
+          MySwal.fire({
+            title: "Deleted!",
+            text: "Customer has been deleted.",
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "btn btn-success",
+            },
+          });
+        } catch (err) {
+          console.error(err);
+          MySwal.fire("Error", err.response?.data?.error || "Failed to delete ❌", "error");
+        }
       }
     });
   };
+
+
+
+
+
+  const handlegetdata = async () => {
+
+    try {
+      const token = localStorage.getItem("token");
+
+      let getdata = await axios.get(`${config.Backendurl}/getcustomer`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      console.log(getdata.data.data);
+      setdata(getdata.data.data)
+
+
+    } catch (err) {
+      // console.error(err);
+      alert(err.response?.data?.error || "Failed to add customer ❌");
+    }
+  }
+
+
+  useEffect(() => {
+    handlegetdata()
+  }, [])
+
   return (
     <div className="page-wrapper">
       <div className="content">
@@ -142,6 +188,7 @@ const Customers = () => {
           maintitle="Customer List"
           subtitle="Manage Your Expense Category"
           addButton="Add New Customer"
+          onAddClick={handleAddClick}
         />
 
         {/* /product list */}
@@ -162,9 +209,8 @@ const Customers = () => {
               </div>
               <div className="search-path">
                 <Link
-                  className={`btn btn-filter ${
-                    isFilterVisible ? "setclose" : ""
-                  }`}
+                  className={`btn btn-filter ${isFilterVisible ? "setclose" : ""
+                    }`}
                   id="filter_search"
                 >
                   <Filter
@@ -242,7 +288,11 @@ const Customers = () => {
         </div>
         {/* /product list */}
       </div>
-      <CustomerModal />
+      <CustomerModal/>
+      <CustomereditModal show={showModal}
+        onClose={() => setShowModal(false)}
+        editCustomer={editCustomer}
+        onSuccess={handlegetdata} />
     </div>
   );
 };
