@@ -1,22 +1,14 @@
 import {
-  Box,
   ChevronUp,
   Edit,
-  Eye,
-  Filter,
-  GitMerge,
   PlusCircle,
   RotateCcw,
-  Sliders,
-  StopCircle,
-  Trash2,
+  Trash2
 } from "feather-icons-react/build/IconComponents";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import Select from "react-select";
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
-import Brand from "../../core/modals/inventory/brand";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { all_routes } from "../../Router/all_routes";
@@ -24,125 +16,56 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import Table from "../../core/pagination/datatable";
 import { setToogleHeader } from "../../core/redux/action";
 import { Download } from "react-feather";
+import axios from "axios";
+import config from "../../config";
 
 const ProductList = () => {
-  const dataSource = useSelector((state) => state.product_list);
+
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
-
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const toggleFilterVisibility = () => {
-    setIsFilterVisible((prevVisibility) => !prevVisibility);
-  };
+  const [dataSource, setdatasource] = useState([])
   const route = all_routes;
-  const options = [
-    { value: "sortByDate", label: "Sort by Date" },
-    { value: "140923", label: "14 09 23" },
-    { value: "110923", label: "11 09 23" },
-  ];
-  const productlist = [
-    { value: "choose", label: "Choose Product" },
-    { value: "lenovo", label: "Lenovo 3rd Generation" },
-    { value: "nike", label: "Nike Jordan" },
-  ];
-  const categorylist = [
-    { value: "choose", label: "Choose Category" },
-    { value: "laptop", label: "Laptop" },
-    { value: "shoe", label: "Shoe" },
-  ];
-  const subcategorylist = [
-    { value: "choose", label: "Choose Sub Category" },
-    { value: "computers", label: "Computers" },
-    { value: "fruits", label: "Fruits" },
-  ];
-  const brandlist = [
-    { value: "all", label: "All Brand" },
-    { value: "lenovo", label: "Lenovo" },
-    { value: "nike", label: "Nike" },
-  ];
-  const price = [
-    { value: "price", label: "Price" },
-    { value: "12500", label: "$12,500.00" },
-    { value: "13000", label: "$13,000.00" }, 
-  ];
 
   const columns = [
     {
       title: "Product",
-      dataIndex: "product",
-      render: (text, record) => (
-        <span className="productimgname">
-          <Link to="/profile" className="product-img stock-img">
-            <ImageWithBasePath alt="" src={record.productImage} />
-          </Link>
-          <Link to="/profile">{text}</Link>
-        </span>
-      ),
-      sorter: (a, b) => a.product.length - b.product.length,
+      dataIndex: "name",
+
+      sorter: (a, b) => a.name.length - b.name.length,
     },
     {
       title: "SKU",
-      dataIndex: "sku",
-      sorter: (a, b) => a.sku.length - b.sku.length,
+      dataIndex: "skuId",
+      sorter: (a, b) => a.skuId.length - b.skuId.length,
     },
 
     {
-      title: "Category",
-      dataIndex: "category",
-      sorter: (a, b) => a.category.length - b.category.length,
+      title: "Cost Price",
+      dataIndex: "costPrice",
+      sorter: (a, b) => a.costPrice.length - b.costPrice.length,
     },
 
-    {
-      title: "Brand",
-      dataIndex: "brand",
-      sorter: (a, b) => a.brand.length - b.brand.length,
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      sorter: (a, b) => a.price.length - b.price.length,
-    },
-    {
-      title: "Unit",
-      dataIndex: "unit",
-      sorter: (a, b) => a.unit.length - b.unit.length,
-    },
-    {
-      title: "Qty",
-      dataIndex: "qty",
-      sorter: (a, b) => a.qty.length - b.qty.length,
-    },
 
     {
-      title: "Created By",
-      dataIndex: "createdby",
-      render: (text, record) => (
-        <span className="userimgname">
-          <Link to="/profile" className="product-img">
-            <ImageWithBasePath alt="" src={record.img} />
-          </Link>
-          <Link to="/profile">{text}</Link>
-        </span>
-      ),
-      sorter: (a, b) => a.createdby.length - b.createdby.length,
+      title: "Unit Price",
+      dataIndex: "salePrice",
+      sorter: (a, b) => a.salePrice.length - b.salePrice.length,
     },
     {
       title: "Action",
-      dataIndex: "action",
-      render: () => (
+      dataIndex: "_id",
+      render: (id) => (
         <div className="action-table-data">
           <div className="edit-delete-action">
             <div className="input-block add-lists"></div>
-            <Link className="me-2 p-2" to={route.productdetails}>
-              <Eye className="feather-view" />
-            </Link>
-            <Link className="me-2 p-2" to={route.editproduct}>
+            <Link className="me-2 p-2" to={`${route.editproduct1}/${id}`}>
               <Edit className="feather-edit" />
             </Link>
+
             <Link
               className="confirm-text p-2"
               to="#"
-              onClick={showConfirmationAlert}
+              onClick={() => showConfirmationAlert(id)}
             >
               <Trash2 className="feather-trash-2" />
             </Link>
@@ -154,7 +77,7 @@ const ProductList = () => {
   ];
   const MySwal = withReactContent(Swal);
 
-  const showConfirmationAlert = () => {
+  const showConfirmationAlert = async (id) => {
     MySwal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -163,8 +86,20 @@ const ProductList = () => {
       confirmButtonText: "Yes, delete it!",
       cancelButtonColor: "#ff0000",
       cancelButtonText: "Cancel",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
+
+
+        const token = localStorage.getItem("token");
+          await axios.delete(`${config.Backendurl}/deleteitems/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          // Update state after delete
+          setdatasource((prev) => prev.filter((item) => item._id !== id));
+
         MySwal.fire({
           title: "Deleted!",
           text: "Your file has been deleted.",
@@ -205,13 +140,36 @@ const ProductList = () => {
       Collapse
     </Tooltip>
   );
+
+  const handlegetitem = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      let res = await axios.get(`${config.Backendurl}/items`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+      setdatasource(res.data.data)
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to add customer ❌");
+    }
+  }
+
+
+  useEffect(() => {
+    handlegetitem()
+  }, [])
+
+
+
+
   return (
     <div className="page-wrapper">
       <div className="content">
         <div className="page-header">
           <div className="add-item d-flex">
             <div className="page-title">
-              <h4>abhya </h4>
+              <h4> Product list </h4>
               <h6>Manage your products</h6>
             </div>
           </div>
@@ -285,139 +243,13 @@ const ProductList = () => {
         {/* /product list */}
         <div className="card table-list-card">
           <div className="card-body">
-            <div className="table-top">
-              <div className="search-set">
-                <div className="search-input">
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    className="form-control form-control-sm formsearch"
-                  />
-                  <Link to className="btn btn-searchset">
-                    <i data-feather="search" className="feather-search" />
-                  </Link>
-                </div>
-              </div>
-              <div className="search-path">
-                <Link
-                  className={`btn btn-filter ${
-                    isFilterVisible ? "setclose" : ""
-                  }`}
-                  id="filter_search"
-                >
-                  <Filter
-                    className="filter-icon"
-                    onClick={toggleFilterVisibility}
-                  />
-                  <span onClick={toggleFilterVisibility}>
-                    <ImageWithBasePath
-                      src="assets/img/icons/closes.svg"
-                      alt="img"
-                    />
-                  </span>
-                </Link>
-              </div>
-              <div className="form-sort">
-                <Sliders className="info-img" />
-                <Select
-                  className="img-select"
-                  classNamePrefix="react-select"
-                  options={options}
-                  placeholder="14 09 23"
-                />
-              </div>
-            </div>
-            {/* /Filter */}
-            <div
-              className={`card${isFilterVisible ? " visible" : ""}`}
-              id="filter_inputs"
-              style={{ display: isFilterVisible ? "block" : "none" }}
-            >
-              <div className="card-body pb-0">
-                <div className="row">
-                  <div className="col-lg-12 col-sm-12">
-                    <div className="row">
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <Box className="info-img" />
-                          <Select
-                            className="img-select"
-                            classNamePrefix="react-select"
-                            options={productlist}
-                            placeholder="Choose Product"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <StopCircle className="info-img" />
-                          <Select
-                            className="img-select"
-                            classNamePrefix="react-select"
-                            options={categorylist}
-                            placeholder="Choose Category"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <GitMerge className="info-img" />
-                          <Select
-                            className="img-select"
-                            classNamePrefix="react-select"
-                            options={subcategorylist}
-                            placeholder="Choose Sub Category"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <StopCircle className="info-img" />
-                          <Select
-                            className="img-select"
-                            classNamePrefix="react-select"
-                            options={brandlist}
-                            placeholder="Nike"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <i className="fas fa-money-bill info-img" />
 
-                          <Select
-                            className="img-select"
-                            classNamePrefix="react-select"
-                            options={price}
-                            placeholder="Price"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-sm-6 col-12">
-                        <div className="input-blocks">
-                          <Link className="btn btn-filters ms-auto">
-                            {" "}
-                            <i
-                              data-feather="search"
-                              className="feather-search"
-                            />{" "}
-                            Search{" "}
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* /Filter */}
+
             <div className="table-responsive">
               <Table columns={columns} dataSource={dataSource} />
             </div>
           </div>
         </div>
-        {/* /product list */}
-        <Brand />
       </div>
     </div>
   );

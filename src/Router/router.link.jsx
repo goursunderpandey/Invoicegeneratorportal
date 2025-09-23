@@ -1421,13 +1421,13 @@ export const posRoutes = [
 ];
 
 export const pagesRoute = [
-  // {
-  //   id: 1,
-  //   path: routes.signin,
-  //   name: "signin",
-  //   element: <SigninThree />,
-  //   route: Route,
-  // },
+  {
+    id: 1,
+    path: routes.signin,
+    name: "signin",
+    element: <SigninTwo />,
+    route: Route,
+  },
   {
     id: 2,
     path: routes.signintwo,

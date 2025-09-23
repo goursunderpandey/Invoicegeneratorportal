@@ -1,16 +1,19 @@
+/* eslint-disable react/prop-types */
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import Header from "../InitialPage/Sidebar/Header";
 import Sidebar from "../InitialPage/Sidebar/Sidebar";
-import { pagesRoute, posRoutes, publicRoutes } from "./router.link";
-import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
 import ThemeSettings from "../InitialPage/themeSettings";
+
+import { pagesRoute, posRoutes, publicRoutes } from "./router.link";
 import ProtectedRoute from "./ProtectedRoute";
 
 const AllRoutes = () => {
   const data = useSelector((state) => state.toggle_header);
 
+  // Layouts
   const HeaderLayout = () => (
     <div className={`main-wrapper ${data ? "header-collapse" : ""}`}>
       <Header />
@@ -36,44 +39,43 @@ const AllRoutes = () => {
   );
 
   return (
-    <div>
-      <Routes>
-        {/* ✅ POS routes (Private) */}
-        <Route
-          path="/pos"
-          element={
-            <ProtectedRoute>
-              <Pospages />
-            </ProtectedRoute>
-          }
-        >
-          {posRoutes.map((route, id) => (
-            <Route path={route.path} element={route.element} key={id} />
-          ))}
-        </Route>
+    <Routes>
+      {/* 🔒 Protected POS routes */}
+      <Route
+        path="/pos"
+        element={
+          <ProtectedRoute>
+            <Pospages />
+          </ProtectedRoute>
+        }
+      >
+        {posRoutes.map((route, id) => (
+          <Route path={route.path} element={route.element} key={id} />
+        ))}
+      </Route>
 
-        {/* ✅ App main pages (Private) */}
-        <Route
-          path={"/"}
-          element={
-            <ProtectedRoute>
-              <HeaderLayout />
-            </ProtectedRoute>
-          }
-        >
-          {publicRoutes.map((route, id) => (
-            <Route path={route.path} element={route.element} key={id} />
-          ))}
-        </Route>
+      {/* 🔒 Protected main app routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HeaderLayout />
+          </ProtectedRoute>
+        }
+      >
+        {publicRoutes.map((route, id) => (
+          <Route path={route.path} element={route.element} key={id} />
+        ))}
+      </Route>
 
-        {/* ✅ Auth pages (Public) */}
-        <Route path={"/"} element={<Authpages />}>
-          {pagesRoute.map((route, id) => (
-            <Route path={route.path} element={route.element} key={id} />
-          ))}
-        </Route>
-      </Routes>
-    </div>
+      {/* 🌐 Public auth routes */}
+      <Route element={<Authpages />}>
+        {pagesRoute.map((route, id) => (
+          <Route path={route.path} element={route.element} key={id} />
+        ))}
+      </Route>
+    </Routes>
   );
 };
+
 export default AllRoutes;

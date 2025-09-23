@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
@@ -21,12 +21,16 @@ import { saleslist } from "../../core/json/saleslistdata";
 import Table from "../../core/pagination/datatable";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
+import axios from "axios";
+import config from "../../config";
 
 const SalesList = () => {
   const saleslistdata = saleslist;
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [customer, setcustomer] = useState([])
+  const [selectcustomer, setselectedcustomer] = useState('')
 
   const toggleFilterVisibility = () => {
     setIsFilterVisible((prevVisibility) => !prevVisibility);
@@ -62,10 +66,7 @@ const SalesList = () => {
     { value: "Computers", label: "Computers" },
     { value: "Fruits", label: "Fruits" },
   ];
-  const customer = [
-    { value: "Choose Customer", label: "Choose Customer" },
-    { value: "Customer Name", label: "Customer Name" },
-  ];
+
   const suppliername = [
     { value: "Supplier", label: "Supplier" },
     { value: "Supplier Name", label: "Supplier Name" },
@@ -160,9 +161,8 @@ const SalesList = () => {
       dataIndex: "status",
       render: (text) => (
         <span
-          className={`badge ${
-            text === "Completed" ? "badge-bgsuccess" : "badge-bgdanger"
-          }`}
+          className={`badge ${text === "Completed" ? "badge-bgsuccess" : "badge-bgdanger"
+            }`}
         >
           {text}
         </span>
@@ -189,9 +189,8 @@ const SalesList = () => {
       dataIndex: "paymentStatus",
       render: (text) => (
         <span
-          className={`badge ${
-            text === "Paid" ? "badge-linesuccess" : "badge-linedanger"
-          }`}
+          className={`badge ${text === "Paid" ? "badge-linesuccess" : "badge-linedanger"
+            }`}
         >
           {text}
         </span>
@@ -209,33 +208,69 @@ const SalesList = () => {
       key: "actions",
       render: () => (
         <div className="text-center">
-        <Link className="action-set" to="#" data-bs-toggle="dropdown" aria-expanded="true">
-          <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
-       </Link>
-        <ul className="dropdown-menu">
-          <li>
-            <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#sales-details-new"><i data-feather="eye" className="feather-eye me-2"></i>Sale Detail</Link>
-          </li>
-          <li>
-            <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#edit-sales-new"><i data-feather="edit" className="feather-edit me-2"></i>Edit Sale</Link>
-          </li>
-          <li>
-            <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#showpayment"><i data-feather="dollar-sign" className="feather-dollar-sign"></i>Show Payments</Link>
-          </li>
-          <li>
-            <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#createpayment"><i data-feather="plus-circle" className="feather-plus-circle me-2"></i>Create Payment</Link>
-          </li>
-          <li>
-            <Link to="#" className="dropdown-item"><i data-feather="download" className="feather-edit me-2"></i>Download pdf</Link>
-          </li>	
-          <li>
-            <Link to="#" className="dropdown-item confirm-text mb-0" onClick={showConfirmationAlert}><i data-feather="trash-2" className="feather-trash me-2"  ></i>Delete Sale</Link>
-          </li>								
-        </ul>
-      </div>
+          <Link className="action-set" to="#" data-bs-toggle="dropdown" aria-expanded="true">
+            <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+          </Link>
+          <ul className="dropdown-menu">
+            <li>
+              <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#sales-details-new"><i data-feather="eye" className="feather-eye me-2"></i>Sale Detail</Link>
+            </li>
+            <li>
+              <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#edit-sales-new"><i data-feather="edit" className="feather-edit me-2"></i>Edit Sale</Link>
+            </li>
+            <li>
+              <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#showpayment"><i data-feather="dollar-sign" className="feather-dollar-sign"></i>Show Payments</Link>
+            </li>
+            <li>
+              <Link to="#" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#createpayment"><i data-feather="plus-circle" className="feather-plus-circle me-2"></i>Create Payment</Link>
+            </li>
+            <li>
+              <Link to="#" className="dropdown-item"><i data-feather="download" className="feather-edit me-2"></i>Download pdf</Link>
+            </li>
+            <li>
+              <Link to="#" className="dropdown-item confirm-text mb-0" onClick={showConfirmationAlert}><i data-feather="trash-2" className="feather-trash me-2"  ></i>Delete Sale</Link>
+            </li>
+          </ul>
+        </div>
       ),
     },
   ];
+
+  const fetchdata = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      let getdata = await axios.get(`${config.Backendurl}/getcustomer`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      console.log(getdata.data.data);
+      let Customerdata = getdata.data.data;
+
+      let newdata = Customerdata.map((el) => (
+
+        {
+          label: el.companyName,
+          value: el._id
+
+        }
+
+      ))
+      setcustomer(newdata);
+
+
+    } catch (err) {
+      // console.error(err);
+      alert(err.response?.data?.error || "Failed to add customer ❌");
+    }
+  }
+
+  useEffect(() => {
+    fetchdata();
+  }, [])
+
+
   return (
     <div>
       <div className="page-wrapper">
@@ -333,9 +368,8 @@ const SalesList = () => {
                   <div className="d-flex align-items-center">
                     <div className="search-path">
                       <Link
-                        className={`btn btn-filter ${
-                          isFilterVisible ? "setclose" : ""
-                        }`}
+                        className={`btn btn-filter ${isFilterVisible ? "setclose" : ""
+                          }`}
                         id="filter_search"
                       >
                         <Filter
@@ -471,6 +505,8 @@ const SalesList = () => {
                                     classNamePrefix="react-select"
                                     options={customer}
                                     placeholder="Newest"
+                                    value={customer.find((el) => el.value === selectcustomer)}
+                                    onChange={(e) => setselectedcustomer(e.value)}
                                   />
                                 </div>
                                 <div className="col-lg-2 col-sm-2 col-2 ps-0">
@@ -487,7 +523,7 @@ const SalesList = () => {
                             <div className="input-blocks">
                               <label>Date</label>
                               <div className="input-groupicon calender-input">
-                              <Calendar className="info-img" />
+                                <Calendar className="info-img" />
                                 <DatePicker
                                   selected={selectedDate}
                                   onChange={handleDateChange}
@@ -499,16 +535,7 @@ const SalesList = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="col-lg-4 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Supplier</label>
-                              <Select
-                                classNamePrefix="react-select"
-                                options={suppliername}
-                                placeholder="Newest"
-                              />
-                            </div>
-                          </div>
+
                           <div className="col-lg-12 col-sm-6 col-12">
                             <div className="input-blocks">
                               <label>Product Name</label>
@@ -726,7 +753,7 @@ const SalesList = () => {
                       <form>
                         <div
                           className="invoice-box table-height"
-                         
+
                         >
                           <div className="sales-details-items d-flex">
                             <div className="details-item">
@@ -805,7 +832,7 @@ const SalesList = () => {
                                     <div className="product-quantity">
                                       <span className="quantity-btn">
                                         +
-                                        <PlusCircle/>
+                                        <PlusCircle />
                                       </span>
                                       <input
                                         type="text"
@@ -817,7 +844,7 @@ const SalesList = () => {
                                           data-feather="minus-circle"
                                           className="feather-minus-circle"
                                         /> */}
-                                        <MinusCircle/>
+                                        <MinusCircle />
                                       </span>
                                     </div>
                                   </td>
@@ -847,7 +874,7 @@ const SalesList = () => {
                                     <div className="product-quantity">
                                       <span className="quantity-btn">
                                         +
-                                        <PlusCircle/>
+                                        <PlusCircle />
                                       </span>
                                       <input
                                         type="text"
@@ -855,7 +882,7 @@ const SalesList = () => {
                                         defaultValue={2}
                                       />
                                       <span className="quantity-btn">
-                                      <MinusCircle/>
+                                        <MinusCircle />
                                       </span>
                                     </div>
                                   </td>
@@ -885,7 +912,7 @@ const SalesList = () => {
                                     <div className="product-quantity">
                                       <span className="quantity-btn">
                                         +
-                                        <PlusCircle/>
+                                        <PlusCircle />
                                       </span>
                                       <input
                                         type="text"
@@ -893,7 +920,7 @@ const SalesList = () => {
                                         defaultValue={2}
                                       />
                                       <span className="quantity-btn">
-                                      <MinusCircle/>
+                                        <MinusCircle />
                                       </span>
                                     </div>
                                   </td>
@@ -997,7 +1024,7 @@ const SalesList = () => {
                             <div className="input-blocks">
                               <label>Purchase Date</label>
                               <div className="input-groupicon calender-input">
-                              <Calendar className="info-img" />
+                                <Calendar className="info-img" />
                                 <DatePicker
                                   selected={selectedDate}
                                   onChange={handleDateChange}
@@ -1071,7 +1098,7 @@ const SalesList = () => {
                                   <div className="product-quantity">
                                     <span className="quantity-btn">
                                       +
-                                      <PlusCircle/>
+                                      <PlusCircle />
                                     </span>
                                     <input
                                       type="text"
@@ -1079,7 +1106,7 @@ const SalesList = () => {
                                       defaultValue={2}
                                     />
                                     <span className="quantity-btn">
-                                    <MinusCircle/>
+                                      <MinusCircle />
                                     </span>
                                   </div>
                                 </td>
@@ -1109,7 +1136,7 @@ const SalesList = () => {
                                   <div className="product-quantity">
                                     <span className="quantity-btn">
                                       +
-                                      <PlusCircle/>
+                                      <PlusCircle />
                                     </span>
                                     <input
                                       type="text"
@@ -1117,7 +1144,7 @@ const SalesList = () => {
                                       defaultValue={2}
                                     />
                                     <span className="quantity-btn">
-                                    <MinusCircle/>
+                                      <MinusCircle />
                                     </span>
                                   </div>
                                 </td>
@@ -1147,7 +1174,7 @@ const SalesList = () => {
                                   <div className="product-quantity">
                                     <span className="quantity-btn">
                                       +
-                                      <PlusCircle/>
+                                      <PlusCircle />
                                     </span>
                                     <input
                                       type="text"
@@ -1155,7 +1182,7 @@ const SalesList = () => {
                                       defaultValue={2}
                                     />
                                     <span className="quantity-btn">
-                                    <MinusCircle/>
+                                      <MinusCircle />
                                     </span>
                                   </div>
                                 </td>
@@ -1376,7 +1403,7 @@ const SalesList = () => {
                       <div className="input-blocks">
                         <label> Date</label>
                         <div className="input-groupicon calender-input ">
-                        <Calendar className="info-img" />
+                          <Calendar className="info-img" />
                           <DatePicker
                             selected={selectedDate}
                             onChange={handleDateChange}

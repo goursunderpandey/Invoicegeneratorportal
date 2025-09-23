@@ -32,7 +32,7 @@ const SigninTwo = () => {
         password: formData.password,
       });
 
-      
+
       localStorage.setItem("token", res.data.token);
 
       alert("Login successful!");
@@ -89,9 +89,8 @@ const SigninTwo = () => {
                       required
                     />
                     <span
-                      className={`fas toggle-password ${
-                        isPasswordVisible ? "fa-eye" : "fa-eye-slash"
-                      }`}
+                      className={`fas toggle-password ${isPasswordVisible ? "fa-eye" : "fa-eye-slash"
+                        }`}
                       onClick={togglePasswordVisibility}
                     ></span>
                   </div>
