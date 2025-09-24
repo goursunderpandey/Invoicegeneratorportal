@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import moment from "moment";
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
 import {
   Calendar,
@@ -17,7 +18,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Filter, MinusCircle } from "react-feather";
 import Select from "react-select";
 import { DatePicker } from "antd";
-import { saleslist } from "../../core/json/saleslistdata";
 import Table from "../../core/pagination/datatable";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
@@ -25,12 +25,16 @@ import axios from "axios";
 import config from "../../config";
 
 const SalesList = () => {
-  const saleslistdata = saleslist;
+  //const saleslistdata = saleslist;
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [customer, setcustomer] = useState([])
-  const [selectcustomer, setselectedcustomer] = useState('')
+  const [selectcustomer, setselectedcustomer] = useState('');
+  const [searchvalue, setSearchValue] = useState("")
+  const [suggestion, setsuggestion] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [saleslistdata, setsaleslistdata] = useState([])
 
   const toggleFilterVisibility = () => {
     setIsFilterVisible((prevVisibility) => !prevVisibility);
@@ -86,6 +90,117 @@ const SalesList = () => {
     setSelectedDate(date);
   };
 
+
+
+  const handlesearch = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      let res = await axios.get(`${config.Backendurl}/searchItem?name=${searchvalue}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+      setsuggestion(res.data)
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to add customer ❌");
+    }
+  }
+
+
+  const handleSelect = (item) => {
+    setSelectedItems((prev) => {
+      const existing = prev.find((i) => i.id === item._id);
+      if (existing) {
+        // increase qty
+        return prev.map((i) =>
+          i.id === item._id ? { ...i, qty: i.qty + 1 } : i
+        );
+      }
+      // add new item
+      return [
+        ...prev,
+        {
+          id: item._id,
+          name: item.name,
+          costPrice: item.costPrice,
+          salePrice: item.salePrice,
+          qty: 1,
+        },
+      ];
+    });
+    setSearchValue("");
+    setsuggestion([]);
+  };
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchvalue.trim() !== "") {
+        handlesearch();
+      } else {
+        setsuggestion([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchvalue]);
+
+
+
+  const handleSale = async (e) => {
+    try {
+
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      let reqobj = {
+        CustomerId: selectcustomer,
+        Saledate: selectedDate,
+        Items: selectedItems
+      }
+
+      await axios.post(`${config.Backendurl}/addSales`, reqobj, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+
+
+
+      MySwal.fire({
+        title: "Sucess",
+        text: "Sales Inserted Sucessfully !",
+        confirmButtonText: "OK",
+        customClass: {
+          confirmButton: "btn btn-success",
+        },
+      });
+
+
+      window.location.reload()
+
+      console.log(reqobj, "reqobj")
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handlegetSaledata = async () => {
+
+    try {
+      const token = localStorage.getItem("token");
+      let res = await axios.get(`${config.Backendurl}/allSales`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+      setsaleslistdata(res.data.data)
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to add customer ❌");
+    }
+  }
+
+  useEffect(() => {
+    handlegetSaledata()
+  }, [])
+
   const renderTooltip = (props) => (
     <Tooltip id="pdf-tooltip" {...props}>
       Pdf
@@ -140,68 +255,32 @@ const SalesList = () => {
   };
   const columns = [
     {
+      title: "SaleId",
+      dataIndex: "saleId",
+    },
+    {
       title: "CustomerName",
       dataIndex: "customerName",
       sorter: (a, b) => a.customerName.length - b.customerName.length,
     },
     {
-      title: "Reference",
-      dataIndex: "reference",
-      sorter: (a, b) => a.reference.length - b.reference.length,
+      title: "CustomerEmail",
+      dataIndex: "customerEmail",
+      sorter: (a, b) => a.customerEmail.length - b.customerEmail.length,
     },
 
     {
       title: "Date",
-      dataIndex: "date",
-      sorter: (a, b) => a.date.length - b.date.length,
-    },
-
-    {
-      title: "Status",
-      dataIndex: "status",
-      render: (text) => (
-        <span
-          className={`badge ${text === "Completed" ? "badge-bgsuccess" : "badge-bgdanger"
-            }`}
-        >
-          {text}
-        </span>
-      ),
-      sorter: (a, b) => a.status.length - b.status.length,
+      dataIndex: "saleDate",
+      render: (date) => moment(date).format("YYYY/MM/DD"),
+      sorter: (a, b) => moment(a.saleDate).unix() - moment(b.saleDate).unix(),
     },
     {
       title: "GrandTotal",
-      dataIndex: "grandTotal",
-      sorter: (a, b) => a.grandTotal.length - b.grandTotal.length,
+      dataIndex: "total",
+      sorter: (a, b) => a.total.length - b.total.length,
     },
-    {
-      title: "Paid",
-      dataIndex: "paid",
-      sorter: (a, b) => a.paid.length - b.paid.length,
-    },
-    {
-      title: "Due",
-      dataIndex: "due",
-      sorter: (a, b) => a.due.length - b.due.length,
-    },
-    {
-      title: "PaymentStatus",
-      dataIndex: "paymentStatus",
-      render: (text) => (
-        <span
-          className={`badge ${text === "Paid" ? "badge-linesuccess" : "badge-linedanger"
-            }`}
-        >
-          {text}
-        </span>
-      ),
-      sorter: (a, b) => a.paymentStatus.length - b.paymentStatus.length,
-    },
-    {
-      title: "Biller",
-      dataIndex: "biller",
-      sorter: (a, b) => a.biller.length - b.biller.length,
-    },
+
     {
       title: "Actions",
       dataIndex: "actions",
@@ -494,7 +573,7 @@ const SalesList = () => {
                   </div>
                   <div className="card">
                     <div className="card-body">
-                      <form>
+                      <form onSubmit={handleSale}>
                         <div className="row">
                           <div className="col-lg-4 col-sm-6 col-12">
                             <div className="input-blocks">
@@ -542,6 +621,8 @@ const SalesList = () => {
                               <div className="input-groupicon select-code">
                                 <input
                                   type="text"
+                                  value={searchvalue}
+                                  onChange={(e) => setSearchValue(e.target.value)}
                                   placeholder="Please type product code and select"
                                 />
                                 <div className="addonset">
@@ -551,121 +632,106 @@ const SalesList = () => {
                                   />
                                 </div>
                               </div>
+                              {suggestion.length > 0 && (
+                                <ul
+                                  className="list-group position-absolute w-100"
+                                  style={{ top: "100%", zIndex: 1000 }}
+                                >
+                                  {suggestion.map((item) => (
+                                    <li
+                                      key={item._id}
+                                      className="list-group-item list-group-item-action"
+                                      onClick={() => handleSelect(item)}
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {item.name} — {item.salePrice}$
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           </div>
                         </div>
                         <div className="table-responsive no-pagination">
-                          <table className="table  datanew">
+                          <table className="table datanew">
                             <thead>
                               <tr>
                                 <th>Product</th>
                                 <th>Qty</th>
-                                <th>Purchase Price($)</th>
-                                <th>Discount($)</th>
-                                <th>Tax(%)</th>
-                                <th>Tax Amount($)</th>
-                                <th>Unit Cost($)</th>
-                                <th>Total Cost(%)</th>
+                                <th>Purchase Price ($)</th>
+                                <th>Unit Cost ($)</th>
+                                <th>Total Cost ($)</th>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr>
-                                <td />
-                                <td />
-                                <td />
-                                <td />
-                                <td />
-                                <td />
-                                <td />
-                                <td />
-                              </tr>
+                              {selectedItems.map((el, index) => (
+                                <tr key={index}>
+                                  {/* Product Name */}
+                                  <td>{el.name}</td>
+
+                                  {/* Qty Editable */}
+                                  <td>
+                                    <input
+                                      type="number"
+                                      className="form-control"
+                                      min="1"
+                                      value={el.qty}
+                                      onChange={(e) => {
+                                        const newQty = parseInt(e.target.value) || 1;
+                                        setSelectedItems((prev) =>
+                                          prev.map((item, i) =>
+                                            i === index ? { ...item, qty: newQty } : item
+                                          )
+                                        );
+                                      }}
+                                    />
+                                  </td>
+
+
+                                  <td>{el.costPrice}</td>
+
+
+                                  <td>
+                                    <input
+                                      type="number"
+                                      className="form-control"
+                                      min="0"
+                                      value={el.salePrice}
+                                      onChange={(e) => {
+                                        const newSalePrice = parseFloat(e.target.value) || 0;
+                                        setSelectedItems((prev) =>
+                                          prev.map((item, i) =>
+                                            i === index ? { ...item, salePrice: newSalePrice } : item
+                                          )
+                                        );
+                                      }}
+                                    />
+                                  </td>
+
+
+                                  <td>{(el.qty * el.salePrice).toFixed(2)}</td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
+
                         <div className="row">
                           <div className="col-lg-6 ms-auto">
                             <div className="total-order w-100 max-widthauto m-auto mb-4">
                               <ul>
                                 <li>
-                                  <h4>Order Tax</h4>
-                                  <h5>$ 0.00</h5>
-                                </li>
-                                <li>
-                                  <h4>Discount</h4>
-                                  <h5>$ 0.00</h5>
-                                </li>
-                                <li>
-                                  <h4>Shipping</h4>
-                                  <h5>$ 0.00</h5>
-                                </li>
-                                <li>
                                   <h4>Grand Total</h4>
-                                  <h5>$ 0.00</h5>
+                                  <h5>{selectedItems.reduce((acc, curr) => {
+                                    return acc + curr.qty * curr.salePrice;
+                                  }, 0)}</h5>
                                 </li>
                               </ul>
                             </div>
                           </div>
                         </div>
-                        <div className="row">
-                          <div className="col-lg-3 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Order Tax</label>
-                              <div className="input-groupicon select-code">
-                                <input
-                                  type="text"
-                                  defaultValue={0}
-                                  className="p-2"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-3 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Discount</label>
-                              <div className="input-groupicon select-code">
-                                <input
-                                  type="text"
-                                  defaultValue={0}
-                                  className="p-2"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-3 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Shipping</label>
-                              <div className="input-groupicon select-code">
-                                <input
-                                  type="text"
-                                  defaultValue={0}
-                                  className="p-2"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-3 col-sm-6 col-12">
-                            <div className="input-blocks mb-5">
-                              <label>Status</label>
-                              <Select
-                                classNamePrefix="react-select"
-                                options={statusupdate}
-                                placeholder="status"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-lg-12 text-end">
-                            <button
-                              type="button"
-                              className="btn btn-cancel add-cancel me-3"
-                              data-bs-dismiss="modal"
-                            >
-                              Cancel
-                            </button>
-                            <Link to="#" className="btn btn-submit add-sale">
-                              Submit
-                            </Link>
-                          </div>
-                        </div>
+
+                        <button type="submit" className="btn btn-primary"> Save & close </button>
                       </form>
                     </div>
                   </div>
