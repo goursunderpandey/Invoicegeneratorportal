@@ -27,7 +27,7 @@ const CustomerModal = () => {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        `${config.Backendurl}/V1/addcustomer`,
+        `${config.Backendurl}/addcustomer`,
         formData,
         {
           headers: {

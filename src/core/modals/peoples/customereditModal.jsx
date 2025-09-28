@@ -53,7 +53,7 @@ const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
 
       if (editCustomer) {
         await axios.put(
-          `${config.Backendurl}/V1/updatecustomer/${editCustomer._id}`,
+          `${config.Backendurl}/updatecustomer/${editCustomer._id}`,
           formData,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +68,7 @@ const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
           },
         });
       } else {
-        await axios.post(`${config.Backendurl}/V1/addcustomer`, formData, {
+        await axios.post(`${config.Backendurl}/addcustomer`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert("Customer added successfully ✅");
