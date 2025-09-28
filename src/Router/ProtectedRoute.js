@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
     const routes = all_routes;
   const token = localStorage.getItem("token");
   if (!token) {
-    return <Navigate to={routes.signintwo} replace />;
+    return <Navigate to={routes.signin} replace />;
   }
   return children;
 };

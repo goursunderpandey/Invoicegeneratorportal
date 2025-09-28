@@ -34,6 +34,7 @@ const SigninTwo = () => {
 
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("User", JSON.stringify(res.data.User));
 
       alert("Login successful!");
       navigate(route.dashboard); // redirect after login

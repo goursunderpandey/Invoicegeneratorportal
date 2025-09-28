@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import { Modal, Button } from "react-bootstrap"; 
+import { Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -68,6 +68,8 @@ const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
           },
         });
       } else {
+
+        
         await axios.post(`${config.Backendurl}/addcustomer`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
