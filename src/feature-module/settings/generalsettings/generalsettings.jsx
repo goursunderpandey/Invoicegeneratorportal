@@ -29,7 +29,7 @@ const GeneralSettings = () => {
         profileImage: '',
         UserId: storedUser?._id || '',
         email: storedUser?.email || '',
-        _id: 0
+        ID: 0
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -152,7 +152,7 @@ const GeneralSettings = () => {
                     profileImage: userData.profileImage || '',
                     UserId: userData.UserId || storedUser._id,
                     email: storedUser?.email || '',
-                    _id: userData._id || 0
+                    ID: userData._id || 0
                 });
 
                 // Handle Cloudinary image URL
