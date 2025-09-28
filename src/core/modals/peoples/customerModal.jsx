@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import config from "../../../config";
 
 const CustomerModal = () => {
   const MySwal = withReactContent(Swal);
@@ -26,7 +27,7 @@ const CustomerModal = () => {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        "http://localhost:8080/V1/addcustomer",
+        `${config.Backendurl}/V1/addcustomer`,
         formData,
         {
           headers: {

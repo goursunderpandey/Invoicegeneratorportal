@@ -4,6 +4,7 @@ import { Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import config from "../../../config";
 
 const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
   const MySwal = withReactContent(Swal);
@@ -52,7 +53,7 @@ const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
 
       if (editCustomer) {
         await axios.put(
-          `http://localhost:8080/V1/updatecustomer/${editCustomer._id}`,
+          `${config.Backendurl}/V1/updatecustomer/${editCustomer._id}`,
           formData,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -67,7 +68,7 @@ const CustomereditModal = ({ show, onClose, editCustomer, onSuccess }) => {
           },
         });
       } else {
-        await axios.post("http://localhost:8080/V1/addcustomer", formData, {
+        await axios.post(`${config.Backendurl}/V1/addcustomer`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert("Customer added successfully ✅");
