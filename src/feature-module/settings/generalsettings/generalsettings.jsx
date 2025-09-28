@@ -131,7 +131,7 @@ const GeneralSettings = () => {
                 })
                 console.log(getdata.data.data);
                 setUserDetails({...getdata.data.data,ID:getdata.data.data?._id})
-                setPreviewImage(`${config.Imageurl}/${getdata.data.data.profileImage}`)
+                setPreviewImage(`${config.Imageurl}${getdata.data.data.profileImage.replace(/\\/g, '/')}`)
 
 
             } catch (err) {
