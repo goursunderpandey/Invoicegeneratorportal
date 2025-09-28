@@ -67,6 +67,18 @@ const initialState = {
   subcategory_data: subcateorydata,
   callhistory_data: callhistorydata,
   layoutstyledata: localStorage.getItem("layoutStyling"),
+  Companyinformation: {
+    firstName: '',
+    lastName: '',
+    userName: '',
+    phone: '',
+    address: '',
+    country: '',
+    state: '',
+    city: '',
+    postalCode: '',
+    profileImage: ''
+  }
 };
 
 export default initialState;

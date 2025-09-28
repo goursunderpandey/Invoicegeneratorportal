@@ -61,6 +61,8 @@ const rootReducer = (state = initialState, action) => {
       return { ...state, categotylist_data: action.payload };
     case "Layoutstyle_data":
       return { ...state, layoutstyledata: action.payload };
+      case "Companyinformation":
+      return { ...state, Companyinformation: action.payload };
     default:
       return state;
   }

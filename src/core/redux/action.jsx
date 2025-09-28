@@ -157,3 +157,8 @@ export const setLayoutChange = (payload) => ({
   type: "Layoutstyle_data",
   payload,
 });
+
+export const setCompanyinformation = (payload) => ({
+  type: "Companyinformation",
+  payload,
+});

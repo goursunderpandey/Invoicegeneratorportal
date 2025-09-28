@@ -4,15 +4,35 @@ import FeatherIcon from "feather-icons-react";
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
 import { Search, Settings, User, XCircle } from "react-feather";
 import { all_routes } from "../../Router/all_routes";
+import axios from "axios";
+import config from "../../config";
+import { useDispatch } from "react-redux";
+import { setCompanyinformation } from "../../core/redux/action";
 
 const Header = () => {
   const route = all_routes;
+  const dispatch = useDispatch()
   const [toggle, SetToggle] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [imageUrl, setimageUrl] = useState("")
+  const [data, setdata] = useState({
+    firstName: '',
+    lastName: '',
+    userName: '',
+    phone: '',
+    address: '',
+    country: '',
+    state: '',
+    city: '',
+    postalCode: '',
+    profileImage: ''
+  })
+  const storedUser = JSON.parse(localStorage.getItem('User'));
 
   const isElementVisible = (element) => {
     return element.offsetWidth > 0 || element.offsetHeight > 0;
   };
+
 
   useEffect(() => {
     const handleMouseover = (e) => {
@@ -34,14 +54,14 @@ const Header = () => {
     return () => {
       document.removeEventListener("mouseover", handleMouseover);
     };
-  }, []); 
+  }, []);
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(
         document.fullscreenElement ||
-          document.mozFullScreenElement ||
-          document.webkitFullscreenElement ||
-          document.msFullscreenElement
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
       );
     };
 
@@ -65,6 +85,75 @@ const Header = () => {
         handleFullscreenChange
       );
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+
+        if (!storedUser?._id) {
+          console.error('No user ID found');
+          return;
+        }
+
+        const response = await axios.get(`${config.Backendurl}/auth/user-details/${storedUser._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // console.log('API Response:', response.data);
+
+        if (response.data.success && response.data.data) {
+          const userData = response.data.data;
+
+          // Update user details
+          let resulobj = {
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            userName: userData.userName || '',
+            phone: userData.phone || '',
+            address: userData.address || '',
+            country: userData.country || '',
+            state: userData.state || '',
+            city: userData.city || '',
+            postalCode: userData.postalCode || '',
+            profileImage: userData.profileImage || ''
+
+          };
+
+          dispatch(setCompanyinformation(resulobj))
+          setdata(resulobj)
+          if (userData.profileImage) {
+            let imageUrl = userData.profileImage;
+
+            if (imageUrl.startsWith('uploads/')) {
+
+              const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+
+              imageUrl = `${config.cloudurl}/${cleanPath}`;
+              console.log(imageUrl);
+              setimageUrl(imageUrl)
+
+            } else {
+              // It's some other format, use as is
+              console.log('Other image URL:', imageUrl);
+
+            }
+          }
+
+          console.log(resulobj);
+
+
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+
+      }
+    };
+    fetchUserData();
   }, []);
   const handlesidebar = () => {
     document.body.classList.toggle("mini-sidebar");
@@ -122,6 +211,10 @@ const Header = () => {
     }
   };
 
+
+
+
+
   return (
     <>
       <div className="header">
@@ -148,8 +241,8 @@ const Header = () => {
                 pathname.includes("tasks") || pathname.includes("pos")
                   ? "none"
                   : pathname.includes("compose")
-                  ? "none"
-                  : "",
+                    ? "none"
+                    : "",
             }}
             onClick={handlesidebar}
           >
@@ -577,14 +670,14 @@ const Header = () => {
               <span className="user-info">
                 <span className="user-letter">
                   <ImageWithBasePath
-                    src="assets/img/profiles/avator1.jpg"
+                    src={imageUrl}
                     alt="img"
                     className="img-fluid"
                   />
                 </span>
                 <span className="user-detail">
-                  <span className="user-name">John Smilga</span>
-                  <span className="user-role">Super Admin</span>
+                  <span className="user-name">{data?.firstName}</span>
+                  <span className="user-role">{data?.lastName}</span>
                 </span>
               </span>
             </Link>
@@ -593,14 +686,14 @@ const Header = () => {
                 <div className="profileset">
                   <span className="user-img">
                     <ImageWithBasePath
-                      src="assets/img/profiles/avator1.jpg"
+                      src={imageUrl}
                       alt="img"
                     />
                     <span className="status online" />
                   </span>
                   <div className="profilesets">
-                    <h6>John Smilga</h6>
-                    <h5>Super Admin</h5>
+                    <h6>{data?.firstName}</h6>
+                    <h5>{data?.lastName}</h5>
                   </div>
                 </div>
                 <hr className="m-0" />
@@ -614,7 +707,7 @@ const Header = () => {
                 <hr className="m-0" />
                 <Link className="dropdown-item logout pb-0" to="/signin">
                   <ImageWithBasePath
-                    src="assets/img/icons/log-out.svg"
+                    src={imageUrl}
                     alt="img"
                     className="me-2"
                   />

@@ -17,26 +17,25 @@ const GeneralSettings = () => {
 
     // Initialize state with proper default values
     const [userDetails, setUserDetails] = useState({
-        firstName: storedUser?.firstName || '',
-        lastName: storedUser?.lastName || '',
-        userName: storedUser?.userName || '',
-        phone: storedUser?.phone || '',
-        address: storedUser?.address || '',
-        country: storedUser?.country || '',
-        state: storedUser?.state || '',
-        city: storedUser?.city || '',
-        postalCode: storedUser?.postalCode || '',
-        profileImage: storedUser?.profileImage || '',
+        firstName: '',
+        lastName: '',
+        userName: '',
+        phone: '',
+        address: '',
+        country: '',
+        state: '',
+        city: '',
+        postalCode: '',
+        profileImage: '',
         UserId: storedUser?._id || '',
         email: storedUser?.email || '',
-        ID : 0
+        _id: 0
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [previewImage, setPreviewImage] = useState(storedUser?.profileImage || '');
+    const [previewImage, setPreviewImage] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -84,7 +83,7 @@ const GeneralSettings = () => {
 
             // Append all user details to formData
             Object.keys(userDetails).forEach(key => {
-                if (key !== 'profileImage' && userDetails[key] !== '') {
+                if (key !== 'profileImage' && userDetails[key] !== '' && userDetails[key] !== null) {
                     formData.append(key, userDetails[key]);
                 }
             });
@@ -101,70 +100,104 @@ const GeneralSettings = () => {
                 },
             });
 
-            if (response.status === 201) {
-                setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            if (response.data.success) {
+                setMessage({ type: 'success', text: response.data.message || 'Profile updated successfully!' });
                 setSelectedFile(null);
 
-
+                // Refresh the data after successful update
+                fetchUserData();
             }
         } catch (error) {
             console.error('Error updating profile:', error);
             setMessage({
                 type: 'error',
-                text: error.response?.data?.error || 'Failed to update profile. Please try again.'
+                text: error.response?.data?.message || error.response?.data?.error || 'Failed to update profile. Please try again.'
             });
         } finally {
             setLoading(false);
         }
     };
 
+    const fetchUserData = async () => {
+        try {
+            const token = localStorage.getItem("token");
 
-    useEffect(() => {
-        const handleGetData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                let getdata = await axios.get(`${config.Backendurl}/auth/user-details/${storedUser?._id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-                console.log(getdata.data.data);
-                setUserDetails({...getdata.data.data,ID:getdata.data.data?._id})
-                setPreviewImage(`${config.Imageurl}${getdata.data.data.profileImage.replace(/\\/g, '/')}`)
-
-
-            } catch (err) {
-                // console.error(err);
-                alert(err.response?.data?.error || "Failed to add customer ❌");
+            if (!storedUser?._id) {
+                console.error('No user ID found');
+                return;
             }
-        }
 
-        handleGetData()
-    }, [])
-
-    const handleCancel = () => {
-        // Reset form to original values
-        if (storedUser) {
-            setUserDetails({
-                firstName: storedUser?.firstName || '',
-                lastName: storedUser?.lastName || '',
-                userName: storedUser?.userName || '',
-                phone: storedUser?.phone || '',
-                address: storedUser?.address || '',
-                country: storedUser?.country || '',
-                state: storedUser?.state || '',
-                city: storedUser?.city || '',
-                postalCode: storedUser?.postalCode || '',
-                profileImage: storedUser?.profileImage || '',
-                UserId: storedUser?._id || '',
-                email: storedUser?.email || ''
+            const response = await axios.get(`${config.Backendurl}/auth/user-details/${storedUser._id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
-            setPreviewImage(storedUser.profileImage || '');
-            setSelectedFile(null);
-            setMessage({ type: '', text: '' });
+
+           // console.log('API Response:', response.data);
+
+            if (response.data.success && response.data.data) {
+                const userData = response.data.data;
+
+                // Update user details
+                setUserDetails({
+                    firstName: userData.firstName || '',
+                    lastName: userData.lastName || '',
+                    userName: userData.userName || '',
+                    phone: userData.phone || '',
+                    address: userData.address || '',
+                    country: userData.country || '',
+                    state: userData.state || '',
+                    city: userData.city || '',
+                    postalCode: userData.postalCode || '',
+                    profileImage: userData.profileImage || '',
+                    UserId: userData.UserId || storedUser._id,
+                    email: storedUser?.email || '',
+                    _id: userData._id || 0
+                });
+
+                // Handle Cloudinary image URL
+                if (userData.profileImage) {
+                    let imageUrl = userData.profileImage;
+
+                    if (imageUrl.startsWith('uploads/')) {
+
+
+
+                        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+
+                        imageUrl = `${config.cloudurl}/${cleanPath}`;
+                       console.log(imageUrl);
+                        setPreviewImage(imageUrl);
+                    } else {
+                        // It's some other format, use as is
+                        console.log('Other image URL:', imageUrl);
+                        setPreviewImage(imageUrl);
+                    }
+                } else {
+                    setPreviewImage('');
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching user data:', err);
+            setMessage({
+                type: 'error',
+                text: err.response?.data?.message || "Failed to load user data"
+            });
         }
     };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    const handleCancel = () => {
+        // Reset form by fetching original data again
+        fetchUserData();
+        setSelectedFile(null);
+        setMessage({ type: '', text: '' });
+    };
+
+
 
     const renderRefreshTooltip = (props) => (
         <Tooltip id="refresh-tooltip" {...props}>
@@ -192,7 +225,12 @@ const GeneralSettings = () => {
                         <ul className="table-top-head">
                             <li>
                                 <OverlayTrigger placement="top" overlay={renderRefreshTooltip}>
-                                    <Link data-bs-toggle="tooltip" data-bs-placement="top">
+                                    <Link
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        onClick={fetchUserData}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <RotateCcw />
                                     </Link>
                                 </OverlayTrigger>
@@ -205,6 +243,7 @@ const GeneralSettings = () => {
                                         id="collapse-header"
                                         className={data ? "active" : ""}
                                         onClick={() => { dispatch(setToogleHeader(!data)) }}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         <ChevronUp />
                                     </Link>
@@ -243,6 +282,7 @@ const GeneralSettings = () => {
                                                     <img
                                                         src={previewImage}
                                                         alt="Profile Preview"
+
                                                         style={{
                                                             width: '100px',
                                                             height: '100px',
