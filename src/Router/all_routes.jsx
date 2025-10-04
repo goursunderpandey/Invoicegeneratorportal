@@ -130,6 +130,8 @@ export const all_routes = {
   prefixes: "/prefixes",
   preference: "/preference",
   saleslist: "/sales-list",
+  manageSales: "/manageSales",
+  manageSalesedit: "/manageSales/:id",
   invoicereport: "/invoice-report",
   salesreturn: "/sales-returns",
   quotationlist: "/quotation-list",

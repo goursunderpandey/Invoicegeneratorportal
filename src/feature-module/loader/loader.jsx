@@ -1,33 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Route,Routes, useLocation } from 'react-router-dom';
+import React  from 'react';
+import { Route,Routes } from 'react-router-dom';
 
-const Loader = () => {
-  const [loading, setLoading] = useState(false);
-  const location = useLocation();
-
-  const showLoader = () => {
-    setLoading(true);
-  };
-
-  const hideLoader = () => {
-    setLoading(false);
-    window.scrollTo(0, 0);
-  };
-
-  useEffect(() => {
-    showLoader();
-    const timeoutId = setTimeout(() => {
-      hideLoader();
-    }, 1000);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [location.pathname]);
-
+const Loader = (loading) => {
+ console.log(loading,"loaddd");
   return (
     <div>
-    {loading && (
+    {loading.loading && (
       <div id="global-loader">
         <div className="whirly-loader"></div>
       </div>

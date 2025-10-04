@@ -196,6 +196,7 @@ import Coupons from "../feature-module/coupons/coupons";
 import { all_routes } from "./all_routes";
 import BankSettingGrid from "../feature-module/settings/financialsettings/banksettinggrid";
 import PayrollList from "../feature-module/hrm/payroll-list";
+import ManageSale from "../feature-module/sales/ManageSale";
 export const publicRoutes = [
   {
     id: 1,
@@ -1232,6 +1233,20 @@ export const publicRoutes = [
     path: routes.saleslist,
     name: "saleslist",
     element: <SalesList />,
+    route: Route,
+  },
+  {
+    id: 102,
+    path: routes.manageSales,
+    name: "saleslist",
+    element: <ManageSale />,
+    route: Route,
+  },
+  {
+    id: 102,
+    path: routes.manageSalesedit,
+    name: "saleslist",
+    element: <ManageSale />,
     route: Route,
   },
   {

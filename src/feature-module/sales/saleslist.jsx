@@ -5,14 +5,11 @@ import moment from "moment";
 
 import ImageWithBasePath from "../../core/img/imagewithbasebath";
 import {
-  Calendar,
   ChevronUp,
   PlusCircle
 } from "feather-icons-react/build/IconComponents";
 import { setToogleHeader } from "../../core/redux/action";
 import { useDispatch, useSelector } from "react-redux";
-import Select from "react-select";
-import { DatePicker } from "antd";
 import Table from "../../core/pagination/datatable";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
@@ -20,40 +17,23 @@ import axios from "axios";
 import config from "../../config";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { all_routes } from "../../Router/all_routes";
 
 
 
 
 const SalesList = () => {
   //const saleslistdata = saleslist;
+  const route = all_routes;
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
-
-  const [customer, setcustomer] = useState([])
-  const [selectcustomer, setselectedcustomer] = useState('');
-  const [searchvalue, setSearchValue] = useState("")
-  const [suggestion, setsuggestion] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const Companyinformation = useSelector((state) => state.Companyinformation);
   const [saleslistdata, setsaleslistdata] = useState([]);
   const [currentSale, setCurrentSale] = useState(null);
-
-  const handleEditSale = (sale) => {
-    console.log(sale, "jiu");
-    setCurrentSale(sale);
-    setselectedcustomer(sale.customerId || "");
-    setSelectedDate(sale.saleDate);
+  const [imageUrl, setimageUrl] = useState("")
+  const [selectedItems, setSelectedItems] = useState([]);
 
 
-    setSelectedItems(
-      sale.Items?.map((item) => ({
-        id: item.id?._id,
-        name: item.id?.name,
-        costPrice: item.costPrice,
-        salePrice: item.salePrice,
-        qty: item.qty,
-      })) || []
-    );
-  };
 
   // Put this OUTSIDE SalesList
   const ExportPDF = (sale) => {
@@ -94,7 +74,7 @@ const SalesList = () => {
         body: tableRows,
         startY: 60,
       });
-      
+
 
       // Grand Total
       doc.text(
@@ -113,42 +93,6 @@ const SalesList = () => {
     }
   };
 
-
-
-
-  // update API call
-  const handleUpdateSale = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-
-      let reqobj = {
-        CustomerId: selectcustomer,
-        SaleDate: selectedDate,
-        Items: selectedItems,
-      };
-
-      await axios.put(`${config.Backendurl}/updatesales/${currentSale.saleId}`, reqobj, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      MySwal.fire({
-        title: "Success",
-        text: "Sale Updated Successfully!",
-        confirmButtonText: "OK",
-        customClass: { confirmButton: "btn btn-success" },
-      });
-
-
-      window.location.reload();
-      handlegetSaledata();
-    } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.error || "Failed to update sale ❌");
-    }
-  };
-
-
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
@@ -161,97 +105,25 @@ const SalesList = () => {
     });
   });
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  const handlesearch = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      let res = await axios.get(`${config.Backendurl}/searchItem?name=${searchvalue}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      })
-      setsuggestion(res.data)
-    } catch (err) {
-      alert(err.response?.data?.error || "Failed to add customer ❌");
-    }
-  }
-
-  const handleSelect = (item) => {
-    setSelectedItems((prev) => {
-      const existing = prev.find((i) => i.id === item._id);
-      if (existing) {
-        // increase qty
-        return prev.map((i) =>
-          i.id === item._id ? { ...i, qty: i.qty + 1 } : i
-        );
-      }
-      // add new item
-      return [
-        ...prev,
-        {
-          id: item._id,
-          name: item.name,
-          costPrice: item.costPrice,
-          salePrice: item.salePrice,
-          qty: 1,
-        },
-      ];
-    });
-    setSearchValue("");
-    setsuggestion([]);
-  };
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchvalue.trim() !== "") {
-        handlesearch();
+    if (Companyinformation.profileImage) {
+      let imageUrl = Companyinformation.profileImage;
+
+      if (imageUrl.startsWith('uploads/')) {
+
+        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+
+        imageUrl = `${config.cloudurl}/${cleanPath}`;
+        console.log(imageUrl);
+        setimageUrl(imageUrl)
+
       } else {
-        setsuggestion([]);
+        // It's some other format, use as is
+        console.log('Other image URL:', imageUrl);
+
       }
-    }, 500);
-
-    return () => clearTimeout(delayDebounce);
-  }, [searchvalue]);
-
-  const handleSale = async (e) => {
-    try {
-
-      e.preventDefault();
-      const token = localStorage.getItem("token");
-      let reqobj = {
-        CustomerId: selectcustomer,
-        Saledate: selectedDate,
-        Items: selectedItems
-      }
-
-      await axios.post(`${config.Backendurl}/addSales`, reqobj, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      })
-
-
-
-      MySwal.fire({
-        title: "Sucess",
-        text: "Sales Inserted Sucessfully !",
-        confirmButtonText: "OK",
-        customClass: {
-          confirmButton: "btn btn-success",
-        },
-      });
-
-
-      window.location.reload()
-
-      console.log(reqobj, "reqobj")
-    } catch (error) {
-      console.log(error);
     }
-  }
+  }, [])
 
   const handlegetSaledata = async () => {
 
@@ -346,15 +218,24 @@ const SalesList = () => {
               <Link to="#" className="dropdown-item"
                 data-bs-toggle="modal"
                 data-bs-target="#sales-details-new"
-                onClick={() => handleEditSale(record)}><i data-feather="eye" className="feather-eye me-2"></i>Sale Detail</Link>
+                onClick={() => {
+                  setCurrentSale(record)
+                  setSelectedItems(
+                    record.Items?.map((item) => ({
+                      id: item.id?._id,
+                      name: item.id?.name,
+                      costPrice: item.costPrice,
+                      salePrice: item.salePrice,
+                      qty: item.qty,
+                    })) || []
+                  );
+                }}><i data-feather="eye" className="feather-eye me-2"></i>Sale Detail</Link>
             </li>
             <li>
               <Link
-                to="#"
+                to={`${route.manageSales}/${record?.saleId}`}
                 className="dropdown-item"
-                data-bs-toggle="modal"
-                data-bs-target="#edit-sales-new"
-                onClick={() => handleEditSale(record)}  // ✅ pass row data
+
               >
                 <i data-feather="edit" className="feather-edit me-2"></i>Edit Sale
               </Link>
@@ -373,39 +254,7 @@ const SalesList = () => {
     },
   ];
 
-  const fetchdata = async () => {
-    try {
-      const token = localStorage.getItem("token");
 
-      let getdata = await axios.get(`${config.Backendurl}/getcustomer`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      console.log(getdata.data.data);
-      let Customerdata = getdata.data.data;
-
-      let newdata = Customerdata.map((el) => (
-
-        {
-          label: el.companyName,
-          value: el._id
-
-        }
-
-      ))
-      setcustomer(newdata);
-
-
-    } catch (err) {
-      // console.error(err);
-      alert(err.response?.data?.error || "Failed to add customer ❌");
-    }
-  }
-
-  useEffect(() => {
-    fetchdata();
-  }, [])
 
 
   return (
@@ -439,10 +288,8 @@ const SalesList = () => {
             </ul>
             <div className="page-btn">
               <Link
-                to="#"
+                to={route.manageSales}
                 className="btn btn-added"
-                data-bs-toggle="modal"
-                data-bs-target="#add-sales-new"
               >
                 <PlusCircle className="me-2" />
                 Add New Sales
@@ -482,194 +329,7 @@ const SalesList = () => {
         </div>
       </div>
       <>
-        {/*add popup */}
-        <div className="modal fade" id="add-sales-new">
-          <div className="modal-dialog add-centered">
-            <div className="modal-content">
-              <div className="page-wrapper p-0 m-0">
-                <div className="content p-0">
-                  <div className="modal-header border-0 custom-modal-header">
-                    <div className="page-title">
-                      <h4> Add Sales</h4>
-                    </div>
-                    <button
-                      type="button"
-                      className="close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
-                  <div className="card">
-                    <div className="card-body">
-                      <form onSubmit={handleSale}>
-                        <div className="row">
-                          <div className="col-lg-4 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Customer Name</label>
-                              <div className="row">
-                                <div className="col-lg-10 col-sm-10 col-10">
-                                  <Select
-                                    classNamePrefix="react-select"
-                                    options={customer}
-                                    placeholder="Newest"
-                                    value={customer.find((el) => el.value === selectcustomer)}
-                                    onChange={(e) => setselectedcustomer(e.value)}
-                                  />
-                                </div>
-                                <div className="col-lg-2 col-sm-2 col-2 ps-0">
-                                  <div className="add-icon">
-                                    <Link to="#" className="choose-add">
-                                      <PlusCircle className="plus" />
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-4 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Date</label>
-                              <div className="input-groupicon calender-input">
-                                <Calendar className="info-img" />
-                                <DatePicker
-                                  selected={selectedDate}
-                                  onChange={handleDateChange}
-                                  type="date"
-                                  className="filterdatepicker"
-                                  placeholder="Choose Date"
-                                />
-                              </div>
-                            </div>
-                          </div>
 
-                          <div className="col-lg-12 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Product Name</label>
-                              <div className="input-groupicon select-code">
-                                <input
-                                  type="text"
-                                  value={searchvalue}
-                                  onChange={(e) => setSearchValue(e.target.value)}
-                                  placeholder="Please type product code and select"
-                                />
-                                <div className="addonset">
-                                  <ImageWithBasePath
-                                    src="assets/img/icons/qrcode-scan.svg"
-                                    alt="img"
-                                  />
-                                </div>
-                              </div>
-                              {suggestion.length > 0 && (
-                                <ul
-                                  className="list-group position-absolute w-100"
-                                  style={{ top: "100%", zIndex: 1000 }}
-                                >
-                                  {suggestion.map((item) => (
-                                    <li
-                                      key={item._id}
-                                      className="list-group-item list-group-item-action"
-                                      onClick={() => handleSelect(item)}
-                                      style={{ cursor: "pointer" }}
-                                    >
-                                      {item.name} — {item.salePrice}$
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="table-responsive no-pagination">
-                          <table className="table datanew">
-                            <thead>
-                              <tr>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Purchase Price ($)</th>
-                                <th>Unit Cost ($)</th>
-                                <th>Total Cost ($)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selectedItems.map((el, index) => (
-                                <tr key={index}>
-                                  {/* Product Name */}
-                                  <td>{el.name}</td>
-
-                                  {/* Qty Editable */}
-                                  <td>
-                                    <input
-                                      type="number"
-                                      className="form-control"
-                                      min="1"
-                                      value={el.qty}
-                                      onChange={(e) => {
-                                        const newQty = parseInt(e.target.value) || 1;
-                                        setSelectedItems((prev) =>
-                                          prev.map((item, i) =>
-                                            i === index ? { ...item, qty: newQty } : item
-                                          )
-                                        );
-                                      }}
-                                    />
-                                  </td>
-
-
-                                  <td>{el.costPrice}</td>
-
-
-                                  <td>
-                                    <input
-                                      type="number"
-                                      className="form-control"
-                                      min="0"
-                                      value={el.salePrice}
-                                      onChange={(e) => {
-                                        const newSalePrice = parseFloat(e.target.value) || 0;
-                                        setSelectedItems((prev) =>
-                                          prev.map((item, i) =>
-                                            i === index ? { ...item, salePrice: newSalePrice } : item
-                                          )
-                                        );
-                                      }}
-                                    />
-                                  </td>
-
-
-                                  <td>{(el.qty * el.salePrice).toFixed(2)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        <div className="row">
-                          <div className="col-lg-6 ms-auto">
-                            <div className="total-order w-100 max-widthauto m-auto mb-4">
-                              <ul>
-                                <li>
-                                  <h4>Grand Total</h4>
-                                  <h5>{selectedItems.reduce((acc, curr) => {
-                                    return acc + curr.qty * curr.salePrice;
-                                  }, 0)}</h5>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button type="submit" className="btn btn-primary"> Save & close </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* /add popup */}
         {/* details popup */}
         <div className="modal fade" id="sales-details-new">
           <div className="modal-dialog sales-details-modal">
@@ -703,6 +363,18 @@ const SalesList = () => {
                           className="invoice-box table-height"
 
                         >
+
+                          <div className="d-flex">
+
+                            <div className=" justify-contect-center">
+                              <Link to="/dashboard" className="logo logo-normal">
+                                <ImageWithBasePath src={imageUrl} alt="img" />
+                              </Link>
+                            </div>
+
+                          </div>
+
+
                           <div className="sales-details-items d-flex">
                             <div className="details-item">
                               <h6>Customer Info</h6>
@@ -785,196 +457,6 @@ const SalesList = () => {
           </div>
         </div>
         {/* /details popup */}
-        {/* edit popup */}
-        <div className="modal fade" id="edit-sales-new">
-          <div className="modal-dialog add-centered">
-            <div className="modal-content">
-              <div className="page-wrapper p-0 m-0">
-                <div className="content p-0">
-                  <div className="modal-header border-0 custom-modal-header">
-                    <div className="page-title">
-                      <h4> Edit Sales</h4>
-                    </div>
-                    <button
-                      type="button"
-                      className="close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
-                  <div className="card">
-                    <div className="card-body">
-                      <form onSubmit={handleUpdateSale}>
-                        <div className="row">
-                          <div className="col-lg-4 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Customer Name</label>
-                              <div className="row">
-                                <div className="col-lg-10 col-sm-10 col-10">
-                                  <Select
-                                    classNamePrefix="react-select"
-                                    options={customer}
-                                    placeholder="Newest"
-                                    value={customer.find((el) => el.value === selectcustomer)}
-                                    onChange={(e) => setselectedcustomer(e.value)}
-                                  />
-                                </div>
-                                <div className="col-lg-2 col-sm-2 col-2 ps-0">
-                                  <div className="add-icon">
-                                    <Link to="#" className="choose-add">
-                                      <PlusCircle className="plus" />
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-4 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Date</label>
-                              <div className="input-groupicon calender-input">
-                                <Calendar className="info-img" />
-                                <DatePicker
-                                  selected={selectedDate}
-                                  onChange={handleDateChange}
-                                  type="date"
-                                  className="filterdatepicker"
-
-                                  placeholder="Choose Date"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-lg-12 col-sm-6 col-12">
-                            <div className="input-blocks">
-                              <label>Product Name</label>
-                              <div className="input-groupicon select-code">
-                                <input
-                                  type="text"
-                                  value={searchvalue}
-                                  onChange={(e) => setSearchValue(e.target.value)}
-                                  placeholder="Please type product code and select"
-                                />
-                                <div className="addonset">
-                                  <ImageWithBasePath
-                                    src="assets/img/icons/qrcode-scan.svg"
-                                    alt="img"
-                                  />
-                                </div>
-                              </div>
-                              {suggestion.length > 0 && (
-                                <ul
-                                  className="list-group position-absolute w-100"
-                                  style={{ top: "100%", zIndex: 1000 }}
-                                >
-                                  {suggestion.map((item) => (
-                                    <li
-                                      key={item._id}
-                                      className="list-group-item list-group-item-action"
-                                      onClick={() => handleSelect(item)}
-                                      style={{ cursor: "pointer" }}
-                                    >
-                                      {item.name} — {item.salePrice}$
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="table-responsive no-pagination">
-                          <table className="table datanew">
-                            <thead>
-                              <tr>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Purchase Price ($)</th>
-                                <th>Unit Cost ($)</th>
-                                <th>Total Cost ($)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selectedItems.map((el, index) => (
-                                <tr key={index}>
-                                  {/* Product Name */}
-                                  <td>{el.name}</td>
-
-                                  {/* Qty Editable */}
-                                  <td>
-                                    <input
-                                      type="number"
-                                      className="form-control"
-                                      min="1"
-                                      value={el.qty}
-                                      onChange={(e) => {
-                                        const newQty = parseInt(e.target.value) || 1;
-                                        setSelectedItems((prev) =>
-                                          prev.map((item, i) =>
-                                            i === index ? { ...item, qty: newQty } : item
-                                          )
-                                        );
-                                      }}
-                                    />
-                                  </td>
-
-
-                                  <td>{el.costPrice}</td>
-
-
-                                  <td>
-                                    <input
-                                      type="number"
-                                      className="form-control"
-                                      min="0"
-                                      value={el.salePrice}
-                                      onChange={(e) => {
-                                        const newSalePrice = parseFloat(e.target.value) || 0;
-                                        setSelectedItems((prev) =>
-                                          prev.map((item, i) =>
-                                            i === index ? { ...item, salePrice: newSalePrice } : item
-                                          )
-                                        );
-                                      }}
-                                    />
-                                  </td>
-
-
-                                  <td>{(el.qty * el.salePrice).toFixed(2)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        <div className="row">
-                          <div className="col-lg-6 ms-auto">
-                            <div className="total-order w-100 max-widthauto m-auto mb-4">
-                              <ul>
-                                <li>
-                                  <h4>Grand Total</h4>
-                                  <h5>{selectedItems.reduce((acc, curr) => {
-                                    return acc + curr.qty * curr.salePrice;
-                                  }, 0)}</h5>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button type="submit" className="btn btn-primary"> Save & close </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
         <div className="customizer-links" id="setdata">
           <ul className="sticky-sidebar">
             <li className="sidebar-icons">

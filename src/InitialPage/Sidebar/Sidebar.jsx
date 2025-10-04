@@ -1,17 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Scrollbars from "react-custom-scrollbars-2";
 import { Link, useLocation } from "react-router-dom";
 import { SidebarData } from "../../core/json/siderbar_data";
 import HorizontalSidebar from "./horizontalSidebar";
 import CollapsedSidebar from "./collapsedSidebar";
+import { useSelector } from "react-redux";
+import config from "../../config";
 
 const Sidebar = () => {
 
   const Location = useLocation();
-
-
+  const data = useSelector((state) => state.Companyinformation)
+  const [imageUrl, setimageUrl] = useState("")
   const [subOpen, setSubopen] = useState("");
   const [subsidebar, setSubsidebar] = useState("");
+
+  console.log(imageUrl);
 
   const toggleSidebar = (title) => {
     if (title == subOpen) {
@@ -28,6 +32,26 @@ const Sidebar = () => {
       setSubsidebar(subitem);
     }
   };
+
+  useEffect(() => {
+    if (data.profileImage) {
+      let imageUrl = data.profileImage;
+
+      if (imageUrl.startsWith('uploads/')) {
+
+        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+
+        imageUrl = `${config.cloudurl}/${cleanPath}`;
+        console.log(imageUrl);
+        setimageUrl(imageUrl)
+
+      } else {
+        // It's some other format, use as is
+        console.log('Other image URL:', imageUrl);
+
+      }
+    }
+  },[])
 
   return (
     <div>
