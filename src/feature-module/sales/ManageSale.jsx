@@ -245,7 +245,7 @@ const ManageSale = () => {
     }
     useEffect(() => {
         fetchdata();
-    }, [])
+    }, [param.id])
     return (
         <>
             <div>
@@ -279,10 +279,9 @@ const ManageSale = () => {
                             </ul>
                             <div className="page-btn">
                                 <Link
-                                    to="#"
+                                    to={route.manageSales}
                                     className="btn btn-added"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#add-sales-new"
+
                                 >
                                     <PlusCircle className="me-2" />
                                     Add New Sales
