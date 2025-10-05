@@ -52,7 +52,10 @@ const SalesList = () => {
       doc.text(`Gst No : ${Companyinformation.GST_NO}`, 14, 40);
 
 
-      if (Companyinformation) {
+      if (Companyinformation.profileImage) {
+        let imageUrl = Companyinformation.profileImage;
+        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+        imageUrl = `${config.cloudurl}/${cleanPath}`;
 
         doc.addImage(imageUrl, "PNG", 150, 10, 40, 20);
       }
