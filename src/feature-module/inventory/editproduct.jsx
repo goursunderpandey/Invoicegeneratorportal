@@ -16,11 +16,13 @@ import axios from "axios";
 import config from "../../config";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import Loader from "../loader/loader";
 
 const EditProduct = () => {
   const MySwal = withReactContent(Swal);
   const route = all_routes;
   const { id } = useParams();
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -75,6 +77,7 @@ const EditProduct = () => {
 
   const handlegetitem = async () => {
     try {
+      setLoading(true)
       const token = localStorage.getItem("token");
       let res = await axios.get(`${config.Backendurl}/itemsbyid/${id}`, {
         headers: {
@@ -82,7 +85,9 @@ const EditProduct = () => {
         }
       })
       setFormData(res.data.data)
+      setLoading(false)
     } catch (err) {
+      setLoading(false)
       alert(err.response?.data?.error || "Failed to add customer ❌");
     }
   }
@@ -94,6 +99,8 @@ const EditProduct = () => {
 
 
   return (
+    <>
+    <Loader  loading ={loading} />
     <div className="page-wrapper">
       <div className="content">
         <div className="page-header">
@@ -233,6 +240,7 @@ const EditProduct = () => {
         {/* /Add Product Form */}
       </div>
     </div>
+    </>
   );
 };
 

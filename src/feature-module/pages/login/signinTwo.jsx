@@ -4,10 +4,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../../Router/all_routes";
 import axios from "axios";
 import config from "../../../config";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
 
 const SigninTwo = () => {
   const route = all_routes;
   const navigate = useNavigate();
+  const MySwal = withReactContent(Swal);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -36,7 +39,11 @@ const SigninTwo = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("User", JSON.stringify(res.data.User));
 
-      alert("Login successful!");
+      MySwal.fire({
+        title: "Success",
+        text: "Login SuccessFully ",
+
+      });
       navigate(route.dashboard); // redirect after login
     } catch (err) {
       alert(err.response?.data?.error || "Login failed");

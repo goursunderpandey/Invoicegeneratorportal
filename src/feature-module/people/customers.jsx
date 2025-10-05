@@ -12,6 +12,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
 import config from "../../config";
+import Loader from "../loader/loader";
 
 const Customers = () => {
   //const data = useSelector((state) => state.customerdata);
@@ -19,7 +20,7 @@ const Customers = () => {
   const [data, setdata] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const toggleFilterVisibility = () => {
     setIsFilterVisible((prevVisibility) => !prevVisibility);
@@ -46,13 +47,13 @@ const Customers = () => {
 
   const handleEditClick = (customer) => {
     let value = data.find((el) => el._id === customer)
-   console.log(value,"edit");
+    console.log(value, "edit");
     setEditCustomer(value);
     setShowModal(true);
   };
 
   const handleAddClick = () => {
-    console.log(23,"edit");
+    console.log(23, "edit");
     setEditCustomer(null);
     setShowModal(true);
   };
@@ -159,6 +160,7 @@ const Customers = () => {
   const handlegetdata = async () => {
 
     try {
+      setLoading(true)
       const token = localStorage.getItem("token");
 
       let getdata = await axios.get(`${config.Backendurl}/getcustomer`, {
@@ -169,9 +171,10 @@ const Customers = () => {
       console.log(getdata.data.data);
       setdata(getdata.data.data)
 
-
+      setLoading(false)
     } catch (err) {
       // console.error(err);
+      setLoading(false)
       alert(err.response?.data?.error || "Failed to add customer ❌");
     }
   }
@@ -182,118 +185,121 @@ const Customers = () => {
   }, [])
 
   return (
-    <div className="page-wrapper">
-      <div className="content">
-        <Breadcrumbs
-          maintitle="Customer List"
-          subtitle="Manage Your Expense Category"
-          addButton="Add New Customer"
-          onAddClick={handleAddClick}
-        />
+    <>
+      <Loader loading={loading} />
+      <div className="page-wrapper">
+        <div className="content">
+          <Breadcrumbs
+            maintitle="Customer List"
+            subtitle="Manage Your Expense Category"
+            addButton="Add New Customer"
+            onAddClick={handleAddClick}
+          />
 
-        {/* /product list */}
-        <div className="card table-list-card">
-          <div className="card-body">
-            <div className="table-top">
-              <div className="search-set">
-                <div className="search-input">
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    className="form-control form-control-sm formsearch"
-                  />
-                  <Link to className="btn btn-searchset">
-                    <i data-feather="search" className="feather-search" />
+          {/* /product list */}
+          <div className="card table-list-card">
+            <div className="card-body">
+              <div className="table-top">
+                <div className="search-set">
+                  <div className="search-input">
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      className="form-control form-control-sm formsearch"
+                    />
+                    <Link to className="btn btn-searchset">
+                      <i data-feather="search" className="feather-search" />
+                    </Link>
+                  </div>
+                </div>
+                <div className="search-path">
+                  <Link
+                    className={`btn btn-filter ${isFilterVisible ? "setclose" : ""
+                      }`}
+                    id="filter_search"
+                  >
+                    <Filter
+                      className="filter-icon"
+                      onClick={toggleFilterVisibility}
+                    />
+                    <span onClick={toggleFilterVisibility}>
+                      <ImageWithBasePath
+                        src="assets/img/icons/closes.svg"
+                        alt="img"
+                      />
+                    </span>
                   </Link>
                 </div>
-              </div>
-              <div className="search-path">
-                <Link
-                  className={`btn btn-filter ${isFilterVisible ? "setclose" : ""
-                    }`}
-                  id="filter_search"
-                >
-                  <Filter
-                    className="filter-icon"
-                    onClick={toggleFilterVisibility}
-                  />
-                  <span onClick={toggleFilterVisibility}>
-                    <ImageWithBasePath
-                      src="assets/img/icons/closes.svg"
-                      alt="img"
-                    />
-                  </span>
-                </Link>
-              </div>
-              <div className="form-sort stylewidth">
-                <Sliders className="info-img" />
+                <div className="form-sort stylewidth">
+                  <Sliders className="info-img" />
 
-                <Select classNamePrefix="react-select"
-                  className="img-select"
-                  options={options}
-                  placeholder="Sort by Date"
+                  <Select classNamePrefix="react-select"
+                    className="img-select"
+                    options={options}
+                    placeholder="Sort by Date"
+                  />
+                </div>
+              </div>
+              {/* /Filter */}
+              <div
+                className={`card${isFilterVisible ? " visible" : ""}`}
+                id="filter_inputs"
+                style={{ display: isFilterVisible ? "block" : "none" }}
+              >
+                <div className="card-body pb-0">
+                  <div className="row">
+                    <div className="col-lg-3 col-sm-6 col-12">
+                      <div className="input-blocks">
+                        <User className="info-img" />
+                        <Select className="img-select" classNamePrefix="react-select"
+                          options={optionsTwo}
+                          placeholder="Choose Customer Name"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-3 col-sm-6 col-12">
+                      <div className="input-blocks">
+                        <Globe className="info-img" />
+                        <Select className="img-select" classNamePrefix="react-select"
+                          options={countries}
+                          placeholder="Choose Country"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-3 col-sm-6 col-12 ms-auto">
+                      <div className="input-blocks">
+                        <a className="btn btn-filters ms-auto">
+                          {" "}
+                          <i
+                            data-feather="search"
+                            className="feather-search"
+                          />{" "}
+                          Search{" "}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* /Filter */}
+              <div className="table-responsive">
+                <Table
+                  className="table datanew"
+                  columns={columns}
+                  dataSource={data}
                 />
               </div>
             </div>
-            {/* /Filter */}
-            <div
-              className={`card${isFilterVisible ? " visible" : ""}`}
-              id="filter_inputs"
-              style={{ display: isFilterVisible ? "block" : "none" }}
-            >
-              <div className="card-body pb-0">
-                <div className="row">
-                  <div className="col-lg-3 col-sm-6 col-12">
-                    <div className="input-blocks">
-                      <User className="info-img" />
-                      <Select className="img-select" classNamePrefix="react-select"
-                        options={optionsTwo}
-                        placeholder="Choose Customer Name"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-sm-6 col-12">
-                    <div className="input-blocks">
-                      <Globe className="info-img" />
-                      <Select className="img-select" classNamePrefix="react-select"
-                        options={countries}
-                        placeholder="Choose Country"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-sm-6 col-12 ms-auto">
-                    <div className="input-blocks">
-                      <a className="btn btn-filters ms-auto">
-                        {" "}
-                        <i
-                          data-feather="search"
-                          className="feather-search"
-                        />{" "}
-                        Search{" "}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* /Filter */}
-            <div className="table-responsive">
-              <Table
-                className="table datanew"
-                columns={columns}
-                dataSource={data}
-              />
-            </div>
           </div>
+          {/* /product list */}
         </div>
-        {/* /product list */}
+        <CustomerModal />
+        <CustomereditModal show={showModal}
+          onClose={() => setShowModal(false)}
+          editCustomer={editCustomer}
+          onSuccess={handlegetdata} />
       </div>
-      <CustomerModal/>
-      <CustomereditModal show={showModal}
-        onClose={() => setShowModal(false)}
-        editCustomer={editCustomer}
-        onSuccess={handlegetdata} />
-    </div>
+    </>
   );
 };
 

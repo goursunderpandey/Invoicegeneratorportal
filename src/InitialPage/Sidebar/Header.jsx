@@ -706,12 +706,10 @@ const Header = () => {
                   Settings
                 </Link>
                 <hr className="m-0" />
-                <Link className="dropdown-item logout pb-0" to="/signin">
-                  <ImageWithBasePath
-                    src={imageUrl}
-                    alt="img"
-                    className="me-2"
-                  />
+                <Link className="dropdown-item logout pb-0" onClick={() => {
+                  localStorage.removeItem("User")
+                  localStorage.removeItem("token")
+                }} to={route.signin}>
                   Logout
                 </Link>
               </div>

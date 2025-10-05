@@ -3,7 +3,7 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import moment from "moment";
 
-import ImageWithBasePath from "../../core/img/imagewithbasebath";
+
 import {
   ChevronUp,
   PlusCircle
@@ -18,6 +18,7 @@ import config from "../../config";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { all_routes } from "../../Router/all_routes";
+import Loader from "../loader/loader";
 
 
 
@@ -30,6 +31,7 @@ const SalesList = () => {
   const Companyinformation = useSelector((state) => state.Companyinformation);
   const storedUser = JSON.parse(localStorage.getItem('User'));
   const [saleslistdata, setsaleslistdata] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [currentSale, setCurrentSale] = useState(null);
   const [imageUrl, setimageUrl] = useState("")
   const [selectedItems, setSelectedItems] = useState([]);
@@ -163,6 +165,7 @@ const SalesList = () => {
   const handlegetSaledata = async () => {
 
     try {
+      setLoading(true)
       const token = localStorage.getItem("token");
       let res = await axios.get(`${config.Backendurl}/allSales`, {
         headers: {
@@ -170,7 +173,9 @@ const SalesList = () => {
         }
       })
       setsaleslistdata(res.data.data)
+      setLoading(false)
     } catch (err) {
+      setLoading(false)
       alert(err.response?.data?.error || "Failed to add customer ❌");
     }
   }
@@ -298,6 +303,7 @@ const SalesList = () => {
 
   return (
     <div>
+      <Loader loading={loading} />
       <div className="page-wrapper">
         <div className="content">
           <div className="page-header">
@@ -375,119 +381,108 @@ const SalesList = () => {
             <div className="modal-content">
               <div className="page-wrapper details-blk">
                 <div className="content p-0">
-                  <div className="page-header p-4 mb-0">
-                    <div className="add-item d-flex">
-                      <div className="page-title modal-datail">
-                        <h4>Sales Detail : {currentSale?.saleId}</h4>
-                      </div>
-
+                  <div className="page-header p-4 mb-0 d-flex justify-content-between mt-3">
+                    {/* Left - Company Info */}
+                    <div>
+                      <h4 className="mb-1">{Companyinformation?.companyName}</h4>
+                      <p className="mb-0 small">
+                        {Companyinformation?.address} <br />
+                        Email: {storedUser?.email} | Phone: {Companyinformation?.phone} <br />
+                        GST No: {Companyinformation?.GST_NO}
+                      </p>
                     </div>
-                    <ul className="table-top-head">
 
-                      <button
-                        type="button"
-                        className="close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      >
-                        <span aria-hidden="true">×</span>
-                      </button>
+                    {/* Right - Logo + Sale Type */}
+                    <div className="text-end">
+                     
+                        <img
+                          src={imageUrl}
+                          alt="Company Logo"
+                          style={{ maxHeight: "100px", marginBottom: "5px" }}
+                        />
+                      
+                      <h5 className="fw-bold mb-0">{currentSale?.SaleType}</h5>
+                    </div>
 
-                    </ul>
+                    {/* Close Button */}
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    />
                   </div>
+
                   <div className="card">
                     <div className="card-body">
-                      <form>
-                        <div
-                          className="invoice-box table-height"
+                      {/* Customer Info */}
+                      <div className="mb-4">
+                        <h6 className="fw-bold">Bill To:</h6>
+                        <p className="mb-0">
+                          Name: {currentSale?.customerName} <br />
+                          Email: {currentSale?.customerEmail} <br />
+                          Phone: {currentSale?.customerphoneNumber} <br />
+                          Address: {currentSale?.customerAddress} <br />
+                          GST No: {currentSale?.customergstNo}
+                        </p>
+                      </div>
 
-                        >
+                      {/* Items Table */}
+                      <h6 className="fw-bold">Order Summary</h6>
+                      <div className="table-responsive no-pagination">
+                        <table className="table table-bordered align-middle">
+                          <thead className="table-primary">
+                            <tr>
+                              <th>#</th>
+                              <th>Product</th>
+                              <th>Qty</th>
+                              <th>Purchase Price (₹)</th>
+                              <th>Unit Cost (₹)</th>
+                              <th>Total (₹)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedItems.map((el, index) => (
+                              <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{el.name}</td>
+                                <td>{el.qty}</td>
+                                <td>{el.costPrice}</td>
+                                <td>{el.salePrice}</td>
+                                <td>{(el.qty * el.salePrice).toFixed(2)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
 
-                          <div className="d-flex">
-
-                            <div className=" justify-contect-center">
-                              <Link to="/dashboard" className="logo logo-normal">
-                                <ImageWithBasePath src={imageUrl} alt="img" />
-                              </Link>
-                            </div>
-
-                          </div>
-
-
-                          <div className="sales-details-items d-flex">
-                            <div className="details-item">
-                              <h6>Customer Info</h6>
-                              <p>
-                                Name : {currentSale?.customerName}
-                                <br />
-                                Email {currentSale?.customerEmail}
-                                <br />
-                                phoneNumber :  {currentSale?.customerphoneNumber}
-                                <br />
-                                Address : {currentSale?.customerAddress}
-                                <br />
-                                GST NO : {currentSale?.customergstNo}
-                              </p>
-                            </div>
-                          </div>
-                          <h5 className="order-text">Order Summary</h5>
-                          <div className="table-responsive no-pagination">
-                            <table className="table datanew">
-                              <thead>
-                                <tr>
-                                  <th>Product</th>
-                                  <th>Qty</th>
-                                  <th>Purchase Price ($)</th>
-                                  <th>Unit Cost ($)</th>
-                                  <th>Total Cost ($)</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {selectedItems.map((el, index) => (
-                                  <tr key={index}>
-                                    {/* Product Name */}
-                                    <td>{el.name}</td>
-
-                                    {/* Qty Editable */}
-                                    <td>
-                                      {el.qty}
-                                    </td>
-
-
-                                    <td>{el.costPrice}</td>
-
-
-                                    <td>
-                                      {el.salePrice}
-                                    </td>
-
-
-                                    <td>{(el.qty * el.salePrice).toFixed(2)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                      {/* Totals */}
+                      <div className="d-flex justify-content-end mt-3">
+                        <div className="text-end">
+                          <h6 className="fw-bold mb-1">Subtotal:</h6>
+                          <p>
+                            ₹
+                            {selectedItems
+                              .reduce((acc, curr) => acc + curr.qty * curr.salePrice, 0)
+                              .toFixed(2)}
+                          </p>
+                          <h6 className="fw-bold mb-1">Total:</h6>
+                          <h5 className="fw-bold text-primary">
+                            ₹
+                            {selectedItems
+                              .reduce((acc, curr) => acc + curr.qty * curr.salePrice, 0)
+                              .toFixed(2)}
+                          </h5>
                         </div>
-                        <div className="row">
-                          <div className="row">
-                            <div className="col-lg-6 ms-auto">
-                              <div className="total-order w-100 max-widthauto m-auto mb-4">
-                                <ul>
+                      </div>
 
-                                  <li>
-                                    <h4>Grand Total</h4>
-                                    <h5>{selectedItems.reduce((acc, curr) => {
-                                      return acc + curr.qty * curr.salePrice;
-                                    }, 0).toFixed(2)}</h5>
-                                  </li>
-
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
+                      {/* Footer */}
+                      <div className="mt-4">
+                        <p className="fst-italic small">
+                          Thank you for your business! <br />
+                          Payment is due within 15 days.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -495,6 +490,7 @@ const SalesList = () => {
             </div>
           </div>
         </div>
+
         {/* /details popup */}
         <div className="customizer-links" id="setdata">
           <ul className="sticky-sidebar">

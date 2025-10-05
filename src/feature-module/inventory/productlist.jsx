@@ -18,12 +18,14 @@ import { setToogleHeader } from "../../core/redux/action";
 import { Download } from "react-feather";
 import axios from "axios";
 import config from "../../config";
+import Loader from "../loader/loader";
 
 const ProductList = () => {
 
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
   const [dataSource, setdatasource] = useState([])
+  const [loading, setLoading] = useState(false);
   const route = all_routes;
 
   const columns = [
@@ -143,6 +145,7 @@ const ProductList = () => {
 
   const handlegetitem = async () => {
     try {
+      setLoading(true)
       const token = localStorage.getItem("token");
       let res = await axios.get(`${config.Backendurl}/items`, {
         headers: {
@@ -150,7 +153,9 @@ const ProductList = () => {
         }
       })
       setdatasource(res.data.data)
+      setLoading(false)
     } catch (err) {
+      setLoading(false)
       alert(err.response?.data?.error || "Failed to add customer ❌");
     }
   }
@@ -164,6 +169,8 @@ const ProductList = () => {
 
 
   return (
+    <>
+    <Loader loading ={loading} />
     <div className="page-wrapper">
       <div className="content">
         <div className="page-header">
@@ -252,6 +259,7 @@ const ProductList = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
