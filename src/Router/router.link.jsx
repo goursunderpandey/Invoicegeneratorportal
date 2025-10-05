@@ -16,6 +16,7 @@ import RegisterThree from "../feature-module/pages/register/registerThree";
 import Error404 from "../feature-module/pages/errorpages/error404";
 import { all_routes } from "./all_routes";
 import ManageSale from "../feature-module/sales/ManageSale";
+import Generalsettings from "../../src/feature-module/settings/generalsettings/generalsettings"
 export const publicRoutes = [
   {
     id: 1,
@@ -80,6 +81,13 @@ export const publicRoutes = [
     path: routes.manageSalesedit,
     name: "saleslist",
     element: <ManageSale />,
+    route: Route,
+  },
+  {
+    id: 102,
+    path: routes.generalsettings,
+    name: "saleslist",
+    element: <Generalsettings />,
     route: Route,
   },
   
