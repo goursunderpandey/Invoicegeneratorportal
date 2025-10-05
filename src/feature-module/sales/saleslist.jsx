@@ -28,43 +28,64 @@ const SalesList = () => {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.toggle_header);
   const Companyinformation = useSelector((state) => state.Companyinformation);
+  const storedUser = JSON.parse(localStorage.getItem('User'));
   const [saleslistdata, setsaleslistdata] = useState([]);
   const [currentSale, setCurrentSale] = useState(null);
   const [imageUrl, setimageUrl] = useState("")
   const [selectedItems, setSelectedItems] = useState([]);
 
+  console.log(Companyinformation, "CompanyInfo");
 
-
-  // Put this OUTSIDE SalesList
   const ExportPDF = (sale) => {
-
     try {
-
-
       const doc = new jsPDF();
 
-      // Title
+      // ========== HEADER ==========
       doc.setFontSize(18);
-      doc.text("Sale Invoice", 14, 20);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${Companyinformation.companyName}`, 14, 20);
 
-      // Customer Info
       doc.setFontSize(12);
-      doc.text(`Customer: ${sale.customerName}`, 14, 30);
-      doc.text(`Email: ${sale.customerEmail}`, 14, 37);
-      doc.text(`Sale Date: ${new Date(sale.saleDate).toLocaleDateString()}`, 14, 44);
-      doc.text(`Sale ID: ${sale.saleId}`, 14, 51);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${Companyinformation?.address}`, 14, 28);
+      doc.text(`Email: ${storedUser?.email} | Phone: ${Companyinformation?.phone}`, 14, 34);
+      doc.text(`Gst No : ${Companyinformation.GST_NO}`, 14, 40);
 
-      // Table
-      const tableColumn = ["Product", "Qty", "Cost Price", "Unit Price", "Total"];
+
+      if (Companyinformation) {
+
+        doc.addImage(imageUrl, "PNG", 150, 10, 40, 20);
+      }
+
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${sale.SaleType}`, 160, 40); // move below logo
+
+      // ========== CUSTOMER & INVOICE INFO ==========
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Bill To:", 14, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${sale.customerName}`, 14, 61);
+      doc.text(`${sale.customerEmail}`, 14, 67);
+      doc.text(`${sale.customergstNo}`, 14, 73);
+
+      doc.setFont("helvetica", "bold");
+      doc.text(`${sale.SaleType} Details:`, 140, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Date: ${new Date(sale.saleDate).toLocaleDateString()}`, 140, 61);
+
+      // ========== ITEMS TABLE ==========
+      const tableColumn = ["#", "Description", "Qty", "Unit Price", "Total"];
       const tableRows = [];
 
-      sale.Items.forEach((item) => {
+      sale.Items.forEach((item, idx) => {
         const row = [
+          idx + 1,
           item.name,
           item.qty,
-          `$${item.costPrice}`,
-          `$${item.salePrice}`,
-          `$${(item.qty * item.salePrice).toFixed(2)}`,
+          `${item.salePrice.toFixed(2)}`,
+          `${(item.qty * item.salePrice).toFixed(2)}`,
         ];
         tableRows.push(row);
       });
@@ -72,22 +93,33 @@ const SalesList = () => {
       autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
-        startY: 60,
+        startY: 90,
+        theme: "grid",
+        headStyles: { fillColor: [41, 128, 185] }, // Blue header
+        bodyStyles: { fontSize: 10 },
       });
 
+      const finalY = doc.lastAutoTable.finalY || 90;
 
-      // Grand Total
-      doc.text(
-        `Grand Total: $${sale.Items.reduce(
-          (acc, curr) => acc + curr.qty * curr.salePrice,
-          0
-        )}`,
-        14,
-        doc.lastAutoTable.finalY + 10
-      );
+      // ========== TOTALS ==========
+      const subtotal = sale.Items.reduce((acc, curr) => acc + curr.qty * curr.salePrice, 0);
+      const grandTotal = subtotal;
 
-      // Save
-      doc.save("sale_invoice.pdf");
+      doc.setFontSize(11);
+      doc.text(`Subtotal: ${subtotal.toFixed(2)}`, 160, finalY + 10);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text(`Total: ${grandTotal.toFixed(2)}`, 160, finalY + 16);
+
+      // ========== FOOTER ==========
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.text("Thank you for your business!", 14, finalY + 40);
+      doc.text("Payment due within 15 days.", 14, finalY + 46);
+
+      // Save file
+      doc.save(`${sale.SaleType}_${sale.saleId}.pdf`);
     } catch (error) {
       console.log(error);
     }
@@ -180,6 +212,10 @@ const SalesList = () => {
     {
       title: "SaleId",
       dataIndex: "saleId",
+      render: (_, record, index) => {
+        const prefix = record.SaleType === "Invoice" ? "INV" : "CR";
+        return `${prefix} ${String(index + 1).padStart(2, "0")}`;
+      },
     },
     {
       title: "CustomerName",
