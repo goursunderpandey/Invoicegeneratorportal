@@ -7,7 +7,7 @@ import Header from "../InitialPage/Sidebar/Header";
 import Sidebar from "../InitialPage/Sidebar/Sidebar";
 import ThemeSettings from "../InitialPage/themeSettings";
 
-import { pagesRoute, posRoutes, publicRoutes } from "./router.link";
+import { pagesRoute,  publicRoutes } from "./router.link";
 import ProtectedRoute from "./ProtectedRoute";
 
 const AllRoutes = () => {
@@ -30,29 +30,11 @@ const AllRoutes = () => {
     </div>
   );
 
-  const Pospages = () => (
-    <div>
-      <Header />
-      <Outlet />
-      <ThemeSettings />
-    </div>
-  );
-
+  
   return (
     <Routes>
       {/* 🔒 Protected POS routes */}
-      <Route
-        path="/pos"
-        element={
-          <ProtectedRoute>
-            <Pospages />
-          </ProtectedRoute>
-        }
-      >
-        {posRoutes.map((route, id) => (
-          <Route path={route.path} element={route.element} key={id} />
-        ))}
-      </Route>
+    
 
       {/* 🔒 Protected main app routes */}
       <Route

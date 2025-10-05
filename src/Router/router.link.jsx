@@ -3,32 +3,6 @@ import { Route, Navigate } from "react-router-dom";
 import ProductList from "../feature-module/inventory/productlist";
 import Dashboard from "../feature-module/dashboard/Dashboard";
 import AddProduct from "../feature-module/inventory/addproduct";
-import SalesDashbaord from "../feature-module/dashboard/salesdashbaord";
-import BrandList from "../feature-module/inventory/brandlist";
-import VariantAttributes from "../feature-module/inventory/variantattributes";
-import Warranty from "../feature-module/inventory/warranty";
-import PrintBarcode from "../feature-module/inventory/printbarcode";
-import Grid from "../feature-module/uiinterface/grid";
-import Images from "../feature-module/uiinterface/images";
-import Lightboxes from "../feature-module/uiinterface/lightbox";
-import Media from "../feature-module/uiinterface/media";
-import Modals from "../feature-module/uiinterface/modals";
-import Offcanvas from "../feature-module/uiinterface/offcanvas";
-import Pagination from "../feature-module/uiinterface/pagination";
-
-import Alert from "../feature-module/uiinterface/alert";
-import Accordion from "../feature-module/uiinterface/accordion";
-import Avatar from "../feature-module/uiinterface/avatar";
-import Badges from "../feature-module/uiinterface/badges";
-import Borders from "../feature-module/uiinterface/borders";
-import Buttons from "../feature-module/uiinterface/buttons";
-import ButtonsGroup from "../feature-module/uiinterface/buttonsgroup";
-import Popovers from "../feature-module/uiinterface/popover";
-
-import Breadcrumb from "../feature-module/uiinterface/breadcrumb";
-import Cards from "../feature-module/uiinterface/cards";
-import Dropdowns from "../feature-module/uiinterface/dropdowns";
-import Colors from "../feature-module/uiinterface/colors";
 import Carousel from "../feature-module/uiinterface/carousel";
 import Spinner from "../feature-module/uiinterface/spinner";
 import NavTabs from "../feature-module/uiinterface/navtabs";
@@ -142,7 +116,6 @@ import Prefixes from "../feature-module/settings/websitesettings/prefixes";
 import Preference from "../feature-module/settings/websitesettings/preference";
 import BanIpaddress from "../feature-module/settings/othersettings/ban-ipaddress";
 import StorageSettings from "../feature-module/settings/othersettings/storagesettings";
-import Pos from "../feature-module/sales/pos";
 import AttendanceAdmin from "../feature-module/hrm/attendanceadmin";
 import Payslip from "../feature-module/hrm/payslip";
 import Holidays from "../feature-module/hrm/holidays";
@@ -188,7 +161,7 @@ import LeavesAdmin from "../feature-module/hrm/leavesadmin";
 import LeavesEmployee from "../feature-module/hrm/leavesemployee";
 import LeaveTypes from "../feature-module/hrm/leavetypes";
 import ProductDetail from "../feature-module/inventory/productdetail";
-import { Units } from "../feature-module/inventory/units";
+
 import TaxRates from "../feature-module/settings/financialsettings/taxrates";
 import CurrencySettings from "../feature-module/settings/financialsettings/currencysettings";
 import WareHouses from "../core/modals/peoples/warehouses";
@@ -219,184 +192,7 @@ export const publicRoutes = [
     element: <AddProduct />,
     route: Route,
   },
-  {
-    id: 4,
-    path: routes.salesdashboard,
-    name: "salesdashboard",
-    element: <SalesDashbaord />,
-    route: Route,
-  },
-  {
-    id: 5,
-    path: routes.brandlist,
-    name: "brant",
-    element: <BrandList />,
-    route: Route,
-  },
-  {
-    id: 6,
-    path: routes.units,
-    name: "unit",
-    element: <Units />,
-    route: Route,
-  },
-  {
-    id: 7,
-    path: routes.variantyattributes,
-    name: "variantyattributes",
-    element: <VariantAttributes />,
-    route: Route,
-  },
-  {
-    id: 8,
-    path: routes.warranty,
-    name: "warranty",
-    element: <Warranty />,
-    route: Route,
-  },
-  {
-    id: 9,
-    path: routes.barcode,
-    name: "barcode",
-    element: <PrintBarcode />,
-    route: Route,
-  },
-  {
-    id: 10,
-    path: routes.alerts,
-    name: "alert",
-    element: <Alert />,
-    route: Route,
-  },
-  {
-    id: 11,
-    path: routes.grid,
-    name: "grid",
-    element: <Grid />,
-    route: Route,
-  },
-
-  {
-    id: 12,
-    path: routes.accordion,
-    name: "accordion",
-    element: <Accordion />,
-    route: Route,
-  },
-  {
-    id: 13,
-    path: routes.avatar,
-    name: "avatar",
-    element: <Avatar />,
-    route: Route,
-  },
-  {
-    id: 14,
-    path: routes.images,
-    name: "images",
-    element: <Images />,
-    route: Route,
-  },
-
-  {
-    id: 15,
-    path: routes.badges,
-    name: "badges",
-    element: <Badges />,
-    route: Route,
-  },
-  {
-    id: 16,
-    path: routes.lightbox,
-    name: "lightbox",
-    element: <Lightboxes />,
-    route: Route,
-  },
-
-  {
-    id: 17,
-    path: routes.borders,
-    name: "borders",
-    element: <Borders />,
-    route: Route,
-  },
-  {
-    id: 18,
-    path: routes.media,
-    name: "lightbox",
-    element: <Media />,
-    route: Route,
-  },
-  {
-    id: 19,
-    path: routes.buttons,
-    name: "borders",
-    element: <Buttons />,
-    route: Route,
-  },
-  {
-    id: 20,
-    path: routes.modals,
-    name: "modals",
-    element: <Modals />,
-    route: Route,
-  },
-  {
-    id: 21,
-    path: routes.offcanvas,
-    name: "offcanvas",
-    element: <Offcanvas />,
-    route: Route,
-  },
-  {
-    id: 22,
-    path: routes.pagination,
-    name: "offcanvas",
-    element: <Pagination />,
-    route: Route,
-  },
-  {
-    id: 23,
-    path: routes.buttonsgroup,
-    name: "buttonsgroup",
-    element: <ButtonsGroup />,
-    route: Route,
-  },
-  {
-    id: 24,
-    path: routes.popover,
-    name: "buttonsgroup",
-    element: <Popovers />,
-    route: Route,
-  },
-  {
-    id: 25,
-    path: routes.breadcrumb,
-    name: "breadcrumb",
-    element: <Breadcrumb />,
-    route: Route,
-  },
-  {
-    id: 26,
-    path: routes.cards,
-    name: "cards",
-    element: <Cards />,
-    route: Route,
-  },
-  {
-    id: 27,
-    path: routes.dropdowns,
-    name: "dropdowns",
-    element: <Dropdowns />,
-    route: Route,
-  },
-  {
-    id: 27,
-    path: routes.colors,
-    name: "colors",
-    element: <Colors />,
-    route: Route,
-  },
+  
   {
     id: 28,
     path: routes.carousel,
@@ -878,13 +674,7 @@ export const publicRoutes = [
     element: <ToDo />,
     route: Route,
   },
-  {
-    id: 66,
-    path: routes.variantattributes,
-    name: "variantattributes",
-    element: <VariantAttributes />,
-    route: Route,
-  },
+
   {
     id: 67,
     path: routes.qrcode,
@@ -1207,13 +997,7 @@ export const publicRoutes = [
     element: <CurrencySettings />,
     route: Route,
   },
-  {
-    id: 99,
-    path: routes.pos,
-    name: "pos",
-    element: <Pos />,
-    route: Route,
-  },
+
   {
     id: 100,
     path: routes.attendanceadmin,
@@ -1425,15 +1209,7 @@ export const publicRoutes = [
     route: Route,
   },
 ];
-export const posRoutes = [
-  {
-    id: 1,
-    path: routes.pos,
-    name: "pos",
-    element: <Pos />,
-    route: Route,
-  },
-];
+
 
 export const pagesRoute = [
   {
