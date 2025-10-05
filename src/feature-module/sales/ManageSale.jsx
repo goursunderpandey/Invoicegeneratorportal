@@ -28,12 +28,14 @@ const ManageSale = () => {
 
     const data = useSelector((state) => state.toggle_header);
     const [selectcustomer, setselectedcustomer] = useState('');
+    const [selectedSaleType, setSelectedSaleType] = useState('Invoice')
     const [loading, setLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [customer, setcustomer] = useState([])
     const [suggestion, setsuggestion] = useState([]);
     const [searchvalue, setSearchValue] = useState("");
+    const [saleType, setSaleType] = useState([]);
 
     const renderCollapseTooltip = (props) => (
         <Tooltip id="refresh-tooltip" {...props}>
@@ -48,6 +50,7 @@ const ManageSale = () => {
             let reqobj = {
                 CustomerId: selectcustomer,
                 Saledate: selectedDate,
+                SaleType: selectedSaleType,
                 Items: selectedItems
             }
 
@@ -80,11 +83,13 @@ const ManageSale = () => {
     const handleUpdateSale = async (e) => {
         e.preventDefault();
         try {
+            setLoading(true)
             const token = localStorage.getItem("token");
 
             let reqobj = {
                 CustomerId: selectcustomer,
                 SaleDate: selectedDate,
+                SaleType: selectedSaleType,
                 Items: selectedItems,
             };
 
@@ -99,10 +104,11 @@ const ManageSale = () => {
                 customClass: { confirmButton: "btn btn-success" },
             });
 
+            setLoading(false)
             navigate(route.saleslist)
-
         } catch (error) {
             console.error(error);
+            setLoading(false)
             alert(error.response?.data?.error || "Failed to update sale ❌");
         }
     };
@@ -184,7 +190,25 @@ const ManageSale = () => {
                 }
 
             ))
+
             setcustomer(newdata);
+
+            let saleTypeList = [
+                {
+                    label: 'Invoice',
+                    value: 'Invoice'
+
+                },
+                {
+                    label: 'CreditMemo',
+                    value: 'CreditMemo'
+
+                }
+            ]
+
+            setSaleType(saleTypeList)
+
+
 
             if (param.id) {
 
@@ -198,6 +222,7 @@ const ManageSale = () => {
 
                 setselectedcustomer(sale.customerId || "");
                 setSelectedDate(sale.saleDate);
+                setSelectedSaleType(sale.SaleType)
 
 
                 setSelectedItems(
@@ -224,7 +249,7 @@ const ManageSale = () => {
     return (
         <>
             <div>
-            <Loader loading={loading} />
+                <Loader loading={loading} />
                 <div className="page-wrapper">
                     <div className="content">
                         <div className="page-header">
@@ -291,7 +316,7 @@ const ManageSale = () => {
                                                             </div>
                                                             <div className="col-lg-2 col-sm-2 col-2 ps-0">
                                                                 <div className="add-icon">
-                                                                    <Link to="#" className="choose-add">
+                                                                    <Link to={route.customers} className="choose-add">
                                                                         <PlusCircle className="plus" />
                                                                     </Link>
                                                                 </div>
@@ -311,6 +336,24 @@ const ManageSale = () => {
                                                                 className="filterdatepicker"
                                                                 placeholder="Choose Date"
                                                             />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-lg-4 col-sm-6 col-12">
+                                                    <div className="input-blocks">
+                                                        <label> Sale Type </label>
+                                                        <div className="row">
+                                                            <div className="col-lg-10 col-sm-10 col-10">
+                                                                <Select
+                                                                    classNamePrefix="react-select"
+                                                                    options={saleType}
+                                                                    placeholder="Sales Type"
+                                                                    value={saleType.find((el) => el.value === selectedSaleType)}
+                                                                    onChange={(e) => setSelectedSaleType(e.value)}
+                                                                />
+                                                            </div>
+
                                                         </div>
                                                     </div>
                                                 </div>

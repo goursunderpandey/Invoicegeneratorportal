@@ -18,7 +18,7 @@ const Header = () => {
   const [data, setdata] = useState({
     firstName: '',
     lastName: '',
-    userName: '',
+    companyName: '',
     phone: '',
     address: '',
     country: '',
@@ -113,7 +113,8 @@ const Header = () => {
           let resulobj = {
             firstName: userData.firstName || '',
             lastName: userData.lastName || '',
-            userName: userData.userName || '',
+            companyName: userData.companyName || '',
+            GST_NO: userData.GST_NO || '',
             phone: userData.phone || '',
             address: userData.address || '',
             country: userData.country || '',
@@ -224,13 +225,13 @@ const Header = () => {
           onMouseLeave={expandMenu}
           onMouseOver={expandMenuOpen}
         >
-          <Link to="/dashboard" className="logo logo-normal">
+          <Link to={route.dashboard} className="logo logo-normal">
             <ImageWithBasePath src={imageUrl} alt="img" />
           </Link>
-          <Link to="/dashboard" className="logo logo-white">
+          <Link to={route.dashboard} className="logo logo-white">
             <ImageWithBasePath src={imageUrl} alt="img" />
           </Link>
-          <Link to="/dashboard" className="logo-small">
+          <Link to={route.dashboard} className="logo-small">
             <ImageWithBasePath src={imageUrl} alt="img" />
           </Link>
           <Link
@@ -676,8 +677,8 @@ const Header = () => {
                   />
                 </span>
                 <span className="user-detail">
-                  <span className="user-name">{data?.firstName}</span>
-                  <span className="user-role">{data?.lastName}</span>
+                  <span className="user-name">{data?.companyName}</span>
+                  <span className="user-role">{data?.companyName}</span>
                 </span>
               </span>
             </Link>
@@ -692,8 +693,8 @@ const Header = () => {
                     <span className="status online" />
                   </span>
                   <div className="profilesets">
-                    <h6>{data?.firstName}</h6>
-                    <h5>{data?.lastName}</h5>
+                    <h6>{data?.companyName}</h6>
+
                   </div>
                 </div>
                 <hr className="m-0" />

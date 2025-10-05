@@ -17,7 +17,7 @@ export const SidebarData = [
 
         submenuItems: [
           { label: "Admin Dashboard", link: "/admin-dashboard" },
-         // { label: "Sales Dashboard", link: "/sales-dashboard" },
+          // { label: "Sales Dashboard", link: "/sales-dashboard" },
         ],
       },
       // {
@@ -58,13 +58,7 @@ export const SidebarData = [
         showSubRoute: false,
         submenu: false,
       },
-      {
-        label: "Create Product",
-        link: "/add-product",
-        icon: <Icon.PlusSquare />,
-        showSubRoute: false,
-        submenu: false,
-      },
+
       // {
       //   label: "Expired Products",
       //   link: "/expired-products",
@@ -181,13 +175,7 @@ export const SidebarData = [
         showSubRoute: false,
         submenu: false,
       },
-      {
-        label: "Invoices",
-        link: "/invoice-report",
-        icon: <Icon.FileText />,
-        showSubRoute: false,
-        submenu: false,
-      },
+
       // {
       //   label: "Sales Return",
       //   link: "/sales-returns",
@@ -195,13 +183,7 @@ export const SidebarData = [
       //   showSubRoute: false,
       //   submenu: false,
       // },
-      {
-        label: "Quotation",
-        link: "/quotation-list",
-        icon: <Icon.Save />,
-        showSubRoute: false,
-        submenu: false,
-      },
+
       // {
       //   label: "POS",
       //   link: "/pos",
@@ -293,13 +275,13 @@ export const SidebarData = [
         showSubRoute: false,
         submenu: false,
       },
-      // {
-      //   label: "Suppliers",
-      //   link: "/suppliers",
-      //   icon: <Icon.Users />,
-      //   showSubRoute: false,
-      //   submenu: false,
-      // },
+      {
+        label: "Suppliers",
+        link: "/suppliers",
+        icon: <Icon.Users />,
+        showSubRoute: false,
+        submenu: false,
+      },
       // {
       //   label: "Stores",
       //   link: "/store-list",

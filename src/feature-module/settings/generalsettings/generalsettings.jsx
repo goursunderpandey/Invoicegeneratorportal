@@ -7,6 +7,7 @@ import { setToogleHeader } from '../../../core/redux/action';
 import SettingsSidebar from '../settingssidebar';
 import axios from 'axios';
 import config from '../../../config';
+import Loader from '../../loader/loader';
 
 const GeneralSettings = () => {
     const dispatch = useDispatch();
@@ -19,7 +20,8 @@ const GeneralSettings = () => {
     const [userDetails, setUserDetails] = useState({
         firstName: '',
         lastName: '',
-        userName: '',
+        companyName: '',
+        GST_NO : '',
         phone: '',
         address: '',
         country: '',
@@ -118,8 +120,10 @@ const GeneralSettings = () => {
         }
     };
 
+    
     const fetchUserData = async () => {
         try {
+            setLoading(true)
             const token = localStorage.getItem("token");
 
             if (!storedUser?._id) {
@@ -142,7 +146,8 @@ const GeneralSettings = () => {
                 setUserDetails({
                     firstName: userData.firstName || '',
                     lastName: userData.lastName || '',
-                    userName: userData.userName || '',
+                    companyName: userData.companyName || '',
+                    GST_NO :  userData.GST_NO || '',
                     phone: userData.phone || '',
                     address: userData.address || '',
                     country: userData.country || '',
@@ -177,7 +182,9 @@ const GeneralSettings = () => {
                     setPreviewImage('');
                 }
             }
+            setLoading(false)
         } catch (err) {
+            setLoading(false)
             console.error('Error fetching user data:', err);
             setMessage({
                 type: 'error',
@@ -185,7 +192,6 @@ const GeneralSettings = () => {
             });
         }
     };
-
     useEffect(() => {
         fetchUserData();
     }, []);
@@ -213,6 +219,7 @@ const GeneralSettings = () => {
 
     return (
         <div>
+            <Loader loading = {loading}/>
             <div className="page-wrapper">
                 <div className="content settings-content">
                     <div className="page-header settings-pg-header">
@@ -273,7 +280,7 @@ const GeneralSettings = () => {
                                                 <span>
                                                     <User className="feather-chevron-up" />
                                                 </span>
-                                                Employee Information
+                                                Company Information
                                             </h6>
                                         </div>
                                         <div className="profile-pic-upload">
@@ -347,12 +354,12 @@ const GeneralSettings = () => {
                                             </div>
                                             <div className="col-md-4">
                                                 <div className="mb-3">
-                                                    <label className="form-label">User Name *</label>
+                                                    <label className="form-label">Company Name *</label>
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        name="userName"
-                                                        value={userDetails.userName}
+                                                        name="companyName"
+                                                        value={userDetails.companyName}
                                                         onChange={handleInputChange}
                                                         required
                                                         disabled={loading}
@@ -380,6 +387,20 @@ const GeneralSettings = () => {
                                                         className="form-control"
                                                         value={userDetails.email}
                                                         disabled
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-4">
+                                                <div className="mb-3">
+                                                    <label className="form-label">GST NO :</label>
+                                                    <input
+                                                        type="text"
+                                                        name="GST_NO"
+                                                        className="form-control"
+                                                        value={userDetails.GST_NO}
+                                                        onChange={handleInputChange}
+                                                        disabled={loading}
+                                                        
                                                     />
                                                 </div>
                                             </div>

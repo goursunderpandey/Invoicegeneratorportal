@@ -85,8 +85,8 @@ const CustomerModal = () => {
                 </div>
                 <div className="modal-body custom-modal-body">
                   <form onSubmit={handleSubmit}>
-                    <div className="row">
-                      <div className="col-lg-4 pe-0">
+                    <div className="">
+                      <div className="col-lg-12 pe-0">
                         <div className="mb-3">
                           <label className="form-label">Company Name </label>
                           <input
@@ -99,7 +99,7 @@ const CustomerModal = () => {
                           />
                         </div>
                       </div>
-                      <div className="col-lg-4 pe-0">
+                      <div className="col-lg-12 pe-0">
                         <div className="mb-3">
                           <label className="form-label">Email</label>
                           <input
@@ -112,7 +112,7 @@ const CustomerModal = () => {
                           />
                         </div>
                       </div>
-                      <div className="col-lg-4 pe-0">
+                      <div className="col-lg-12 pe-0">
                         <div className="input-blocks">
                           <label className="mb-2">Phone</label>
                           <input
@@ -137,7 +137,7 @@ const CustomerModal = () => {
                           />
                         </div>
                       </div>
-                      <div className="col-lg-6 pe-0">
+                      <div className="col-lg-12 pe-0">
                         <div className="mb-3">
                           <label className="form-label">GST No : </label>
                           <input
